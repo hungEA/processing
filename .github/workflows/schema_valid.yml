@@ -1,0 +1,15 @@
+on:
+  push:
+    branches:
+      - feature/schema-valid-workflow
+
+jobs:
+  apply-transaction:
+    runs-on: cdi-runner
+      steps:
+      - run: echo "DONE!"
+
+  schema-validation:
+    runs-on: cdi-runner
+      steps:
+      - run: curl ifconfig.me/ip
