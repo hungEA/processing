@@ -6,10 +6,10 @@ on:
 jobs:
   apply-transaction:
     runs-on: cdi-runner
-      steps:
-      - run: echo "DONE!"
+    steps:
+    - run: echo "DONE!"
 
   schema-validation:
     runs-on: cdi-runner
-      steps:
-      - run: curl ifconfig.me/ip
+    steps:
+    - run: curl ifconfig.me/ip
