@@ -1,0 +1,13 @@
+---
+name: "check-runner"
+
+on:
+  push
+
+jobs:
+  check-runner:
+    name: "Check Runner"
+    runs-on: "example-runnerdeploy"
+    steps:
+      - name: Print out
+        run: echo "THIS IS A TEST RUNNER"
