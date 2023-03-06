@@ -7,7 +7,7 @@ on:
 jobs:
   check-runner:
     name: "Check Runner"
-    runs-on: "example-runnerdeploy"
+    runs-on: "example-runnerdeploy-xzdl4-jts4b"
     steps:
       - name: Print out
         run: echo "THIS IS A TEST RUNNER"
