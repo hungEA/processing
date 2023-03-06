@@ -7,7 +7,7 @@ on:
 jobs:
   check-runner:
     name: "Check Runner"
-    runs-on: "example-runnerdeploy-m6t5w-cwbsk"
+    runs-on: "self-hosted"
     steps:
       - name: Print out
         run: echo "THIS IS A TEST RUNNER"
