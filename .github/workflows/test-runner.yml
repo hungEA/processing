@@ -33,7 +33,7 @@ jobs:
       - name: Connect sqlite
         run: python scripts/create_sqlite.py
       - name: Connect postgres db
-        run: psql -h localhost -p 5432 -w postgres
+        run: python scripts/connect_postgres.py
         env:
           # The hostname used to communicate with the PostgreSQL service container
           POSTGRES_HOST: localhost
