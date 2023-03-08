@@ -20,6 +20,152 @@ SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
+--
+-- Name: app_config_appvalueconfig; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.app_config_appvalueconfig (
+    id integer NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    name character varying(32) NOT NULL,
+    value character varying(64) NOT NULL,
+    description text NOT NULL
+);
+
+
+ALTER TABLE public.app_config_appvalueconfig OWNER TO ipno;
+
+--
+-- Name: app_config_appconfig_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.app_config_appconfig_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.app_config_appconfig_id_seq OWNER TO ipno;
+
+--
+-- Name: app_config_appconfig_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.app_config_appconfig_id_seq OWNED BY public.app_config_appvalueconfig.id;
+
+
+--
+-- Name: app_config_apptextcontent; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.app_config_apptextcontent (
+    id integer NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    name character varying(32) NOT NULL,
+    value text,
+    description text NOT NULL
+);
+
+
+ALTER TABLE public.app_config_apptextcontent OWNER TO ipno;
+
+--
+-- Name: app_config_apptextcontent_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.app_config_apptextcontent_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.app_config_apptextcontent_id_seq OWNER TO ipno;
+
+--
+-- Name: app_config_apptextcontent_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.app_config_apptextcontent_id_seq OWNED BY public.app_config_apptextcontent.id;
+
+
+--
+-- Name: app_config_frontpagecard; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.app_config_frontpagecard (
+    id integer NOT NULL,
+    "order" integer NOT NULL,
+    content text NOT NULL,
+    CONSTRAINT app_config_frontpagecard_order_check CHECK (("order" >= 0))
+);
+
+
+ALTER TABLE public.app_config_frontpagecard OWNER TO ipno;
+
+--
+-- Name: app_config_frontpagecard_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.app_config_frontpagecard_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.app_config_frontpagecard_id_seq OWNER TO ipno;
+
+--
+-- Name: app_config_frontpagecard_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.app_config_frontpagecard_id_seq OWNED BY public.app_config_frontpagecard.id;
+
+
+--
+-- Name: app_config_frontpageorder; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.app_config_frontpageorder (
+    id integer NOT NULL,
+    section character varying(50) NOT NULL,
+    "order" integer NOT NULL,
+    CONSTRAINT app_config_frontpageorder_order_check CHECK (("order" >= 0))
+);
+
+
+ALTER TABLE public.app_config_frontpageorder OWNER TO ipno;
+
+--
+-- Name: app_config_frontpageorder_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.app_config_frontpageorder_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.app_config_frontpageorder_id_seq OWNER TO ipno;
+
+--
+-- Name: app_config_frontpageorder_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.app_config_frontpageorder_id_seq OWNED BY public.app_config_frontpageorder.id;
 
 
 --
@@ -42,6 +188,8 @@ CREATE TABLE public.appeals_appeal (
 );
 
 
+ALTER TABLE public.appeals_appeal OWNER TO ipno;
+
 --
 -- Name: appeals_appeal_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
 --
@@ -55,12 +203,174 @@ CREATE SEQUENCE public.appeals_appeal_id_seq
     CACHE 1;
 
 
+ALTER TABLE public.appeals_appeal_id_seq OWNER TO ipno;
+
 --
 -- Name: appeals_appeal_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
 --
 
 ALTER SEQUENCE public.appeals_appeal_id_seq OWNED BY public.appeals_appeal.id;
 
+
+--
+-- Name: auth_group; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.auth_group (
+    id integer NOT NULL,
+    name character varying(150) NOT NULL
+);
+
+
+ALTER TABLE public.auth_group OWNER TO ipno;
+
+--
+-- Name: auth_group_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.auth_group_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.auth_group_id_seq OWNER TO ipno;
+
+--
+-- Name: auth_group_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.auth_group_id_seq OWNED BY public.auth_group.id;
+
+
+--
+-- Name: auth_group_permissions; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.auth_group_permissions (
+    id integer NOT NULL,
+    group_id integer NOT NULL,
+    permission_id integer NOT NULL
+);
+
+
+ALTER TABLE public.auth_group_permissions OWNER TO ipno;
+
+--
+-- Name: auth_group_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.auth_group_permissions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.auth_group_permissions_id_seq OWNER TO ipno;
+
+--
+-- Name: auth_group_permissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.auth_group_permissions_id_seq OWNED BY public.auth_group_permissions.id;
+
+
+--
+-- Name: auth_permission; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.auth_permission (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    content_type_id integer NOT NULL,
+    codename character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public.auth_permission OWNER TO ipno;
+
+--
+-- Name: auth_permission_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.auth_permission_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.auth_permission_id_seq OWNER TO ipno;
+
+--
+-- Name: auth_permission_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.auth_permission_id_seq OWNED BY public.auth_permission.id;
+
+
+--
+-- Name: authentication_user; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.authentication_user (
+    id integer NOT NULL,
+    password character varying(128) NOT NULL,
+    last_login timestamp with time zone,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    email character varying(255) NOT NULL,
+    is_active boolean NOT NULL,
+    is_admin boolean NOT NULL,
+    recent_items jsonb,
+    recent_queries character varying(255)[]
+);
+
+
+ALTER TABLE public.authentication_user OWNER TO ipno;
+
+--
+-- Name: authentication_user_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.authentication_user_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.authentication_user_id_seq OWNER TO ipno;
+
+--
+-- Name: authentication_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.authentication_user_id_seq OWNED BY public.authentication_user.id;
+
+
+--
+-- Name: authtoken_token; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.authtoken_token (
+    key character varying(40) NOT NULL,
+    created timestamp with time zone NOT NULL,
+    user_id integer NOT NULL
+);
+
+
+ALTER TABLE public.authtoken_token OWNER TO ipno;
 
 --
 -- Name: citizens_citizen; Type: TABLE; Schema: public; Owner: ipno
@@ -86,6 +396,9 @@ CREATE TABLE public.citizens_citizen (
     use_of_force_id integer
 );
 
+
+ALTER TABLE public.citizens_citizen OWNER TO ipno;
+
 --
 -- Name: citizens_citizen_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
 --
@@ -98,6 +411,8 @@ CREATE SEQUENCE public.citizens_citizen_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
+ALTER TABLE public.citizens_citizen_id_seq OWNER TO ipno;
 
 --
 -- Name: citizens_citizen_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
@@ -125,6 +440,8 @@ CREATE TABLE public.complaints_complaint (
 );
 
 
+ALTER TABLE public.complaints_complaint OWNER TO ipno;
+
 --
 -- Name: complaints_complaint_departments; Type: TABLE; Schema: public; Owner: ipno
 --
@@ -135,6 +452,8 @@ CREATE TABLE public.complaints_complaint_departments (
     department_id integer NOT NULL
 );
 
+
+ALTER TABLE public.complaints_complaint_departments OWNER TO ipno;
 
 --
 -- Name: complaints_complaint_departments_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
@@ -149,6 +468,7 @@ CREATE SEQUENCE public.complaints_complaint_departments_id_seq
     CACHE 1;
 
 
+ALTER TABLE public.complaints_complaint_departments_id_seq OWNER TO ipno;
 
 --
 -- Name: complaints_complaint_departments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
@@ -168,6 +488,8 @@ CREATE TABLE public.complaints_complaint_events (
 );
 
 
+ALTER TABLE public.complaints_complaint_events OWNER TO ipno;
+
 --
 -- Name: complaints_complaint_events_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
 --
@@ -180,6 +502,8 @@ CREATE SEQUENCE public.complaints_complaint_events_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
+ALTER TABLE public.complaints_complaint_events_id_seq OWNER TO ipno;
 
 --
 -- Name: complaints_complaint_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
@@ -201,6 +525,8 @@ CREATE SEQUENCE public.complaints_complaint_id_seq
     CACHE 1;
 
 
+ALTER TABLE public.complaints_complaint_id_seq OWNER TO ipno;
+
 --
 -- Name: complaints_complaint_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
 --
@@ -219,6 +545,8 @@ CREATE TABLE public.complaints_complaint_officers (
 );
 
 
+ALTER TABLE public.complaints_complaint_officers OWNER TO ipno;
+
 --
 -- Name: complaints_complaint_officers_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
 --
@@ -232,11 +560,97 @@ CREATE SEQUENCE public.complaints_complaint_officers_id_seq
     CACHE 1;
 
 
+ALTER TABLE public.complaints_complaint_officers_id_seq OWNER TO ipno;
+
 --
 -- Name: complaints_complaint_officers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
 --
 
 ALTER SEQUENCE public.complaints_complaint_officers_id_seq OWNED BY public.complaints_complaint_officers.id;
+
+
+--
+-- Name: data_importlog; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.data_importlog (
+    id integer NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    data_model character varying(255) NOT NULL,
+    repo_name character varying(255),
+    commit_hash character varying(255),
+    status character varying(32) NOT NULL,
+    created_rows integer,
+    updated_rows integer,
+    deleted_rows integer,
+    started_at timestamp with time zone,
+    finished_at timestamp with time zone,
+    error_message text
+);
+
+
+ALTER TABLE public.data_importlog OWNER TO ipno;
+
+--
+-- Name: data_importlog_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.data_importlog_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.data_importlog_id_seq OWNER TO ipno;
+
+--
+-- Name: data_importlog_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.data_importlog_id_seq OWNED BY public.data_importlog.id;
+
+
+--
+-- Name: data_wrglrepo; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.data_wrglrepo (
+    id integer NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    data_model character varying(255) NOT NULL,
+    repo_name character varying(255) NOT NULL,
+    commit_hash character varying(255),
+    latest_commit_hash character varying(255)
+);
+
+
+ALTER TABLE public.data_wrglrepo OWNER TO ipno;
+
+--
+-- Name: data_wrglrepo_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.data_wrglrepo_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.data_wrglrepo_id_seq OWNER TO ipno;
+
+--
+-- Name: data_wrglrepo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.data_wrglrepo_id_seq OWNED BY public.data_wrglrepo.id;
 
 
 --
@@ -261,6 +675,8 @@ CREATE TABLE public.departments_department (
 );
 
 
+ALTER TABLE public.departments_department OWNER TO ipno;
+
 --
 -- Name: departments_department_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
 --
@@ -273,6 +689,8 @@ CREATE SEQUENCE public.departments_department_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
+ALTER TABLE public.departments_department_id_seq OWNER TO ipno;
 
 --
 -- Name: departments_department_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
@@ -292,6 +710,8 @@ CREATE TABLE public.departments_department_starred_documents (
 );
 
 
+ALTER TABLE public.departments_department_starred_documents OWNER TO ipno;
+
 --
 -- Name: departments_department_starred_documents_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
 --
@@ -304,11 +724,49 @@ CREATE SEQUENCE public.departments_department_starred_documents_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
+ALTER TABLE public.departments_department_starred_documents_id_seq OWNER TO ipno;
+
 --
 -- Name: departments_department_starred_documents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
 --
 
 ALTER SEQUENCE public.departments_department_starred_documents_id_seq OWNED BY public.departments_department_starred_documents.id;
+
+
+--
+-- Name: departments_department_starred_news_articles; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.departments_department_starred_news_articles (
+    id integer NOT NULL,
+    department_id integer NOT NULL,
+    newsarticle_id integer NOT NULL
+);
+
+
+ALTER TABLE public.departments_department_starred_news_articles OWNER TO ipno;
+
+--
+-- Name: departments_department_starred_news_articles_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.departments_department_starred_news_articles_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.departments_department_starred_news_articles_id_seq OWNER TO ipno;
+
+--
+-- Name: departments_department_starred_news_articles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.departments_department_starred_news_articles_id_seq OWNED BY public.departments_department_starred_news_articles.id;
 
 
 --
@@ -321,6 +779,8 @@ CREATE TABLE public.departments_department_starred_officers (
     officer_id integer NOT NULL
 );
 
+
+ALTER TABLE public.departments_department_starred_officers OWNER TO ipno;
 
 --
 -- Name: departments_department_starred_officers_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
@@ -335,12 +795,383 @@ CREATE SEQUENCE public.departments_department_starred_officers_id_seq
     CACHE 1;
 
 
+ALTER TABLE public.departments_department_starred_officers_id_seq OWNER TO ipno;
+
 --
 -- Name: departments_department_starred_officers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
 --
 
 ALTER SEQUENCE public.departments_department_starred_officers_id_seq OWNED BY public.departments_department_starred_officers.id;
 
+
+--
+-- Name: departments_officermovement; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.departments_officermovement (
+    id integer NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    date date NOT NULL,
+    left_reason character varying(255),
+    end_department_id integer NOT NULL,
+    officer_id integer NOT NULL,
+    start_department_id integer NOT NULL
+);
+
+
+ALTER TABLE public.departments_officermovement OWNER TO ipno;
+
+--
+-- Name: departments_officermovement_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.departments_officermovement_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.departments_officermovement_id_seq OWNER TO ipno;
+
+--
+-- Name: departments_officermovement_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.departments_officermovement_id_seq OWNED BY public.departments_officermovement.id;
+
+
+--
+-- Name: departments_wrglfile; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.departments_wrglfile (
+    id integer NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    name character varying(255) NOT NULL,
+    description text,
+    slug character varying(255) NOT NULL,
+    url character varying(255) NOT NULL,
+    download_url character varying(255) NOT NULL,
+    "position" integer NOT NULL,
+    default_expanded boolean NOT NULL,
+    department_id integer
+);
+
+
+ALTER TABLE public.departments_wrglfile OWNER TO ipno;
+
+--
+-- Name: departments_wrglfile_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.departments_wrglfile_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.departments_wrglfile_id_seq OWNER TO ipno;
+
+--
+-- Name: departments_wrglfile_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.departments_wrglfile_id_seq OWNED BY public.departments_wrglfile.id;
+
+
+--
+-- Name: django_admin_log; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.django_admin_log (
+    id integer NOT NULL,
+    action_time timestamp with time zone NOT NULL,
+    object_id text,
+    object_repr character varying(200) NOT NULL,
+    action_flag smallint NOT NULL,
+    change_message text NOT NULL,
+    content_type_id integer,
+    user_id integer NOT NULL,
+    CONSTRAINT django_admin_log_action_flag_check CHECK ((action_flag >= 0))
+);
+
+
+ALTER TABLE public.django_admin_log OWNER TO ipno;
+
+--
+-- Name: django_admin_log_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.django_admin_log_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.django_admin_log_id_seq OWNER TO ipno;
+
+--
+-- Name: django_admin_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.django_admin_log_id_seq OWNED BY public.django_admin_log.id;
+
+
+--
+-- Name: django_celery_results_chordcounter; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.django_celery_results_chordcounter (
+    id integer NOT NULL,
+    group_id character varying(255) NOT NULL,
+    sub_tasks text NOT NULL,
+    count integer NOT NULL,
+    CONSTRAINT django_celery_results_chordcounter_count_check CHECK ((count >= 0))
+);
+
+
+ALTER TABLE public.django_celery_results_chordcounter OWNER TO ipno;
+
+--
+-- Name: django_celery_results_chordcounter_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.django_celery_results_chordcounter_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.django_celery_results_chordcounter_id_seq OWNER TO ipno;
+
+--
+-- Name: django_celery_results_chordcounter_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.django_celery_results_chordcounter_id_seq OWNED BY public.django_celery_results_chordcounter.id;
+
+
+--
+-- Name: django_celery_results_groupresult; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.django_celery_results_groupresult (
+    id integer NOT NULL,
+    group_id character varying(255) NOT NULL,
+    date_created timestamp with time zone NOT NULL,
+    date_done timestamp with time zone NOT NULL,
+    content_type character varying(128) NOT NULL,
+    content_encoding character varying(64) NOT NULL,
+    result text
+);
+
+
+ALTER TABLE public.django_celery_results_groupresult OWNER TO ipno;
+
+--
+-- Name: django_celery_results_groupresult_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.django_celery_results_groupresult_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.django_celery_results_groupresult_id_seq OWNER TO ipno;
+
+--
+-- Name: django_celery_results_groupresult_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.django_celery_results_groupresult_id_seq OWNED BY public.django_celery_results_groupresult.id;
+
+
+--
+-- Name: django_celery_results_taskresult; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.django_celery_results_taskresult (
+    id integer NOT NULL,
+    task_id character varying(255) NOT NULL,
+    status character varying(50) NOT NULL,
+    content_type character varying(128) NOT NULL,
+    content_encoding character varying(64) NOT NULL,
+    result text,
+    date_done timestamp with time zone NOT NULL,
+    traceback text,
+    meta text,
+    task_args text,
+    task_kwargs text,
+    task_name character varying(255),
+    worker character varying(100),
+    date_created timestamp with time zone NOT NULL,
+    periodic_task_name character varying(255)
+);
+
+
+ALTER TABLE public.django_celery_results_taskresult OWNER TO ipno;
+
+--
+-- Name: django_celery_results_taskresult_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.django_celery_results_taskresult_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.django_celery_results_taskresult_id_seq OWNER TO ipno;
+
+--
+-- Name: django_celery_results_taskresult_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.django_celery_results_taskresult_id_seq OWNED BY public.django_celery_results_taskresult.id;
+
+
+--
+-- Name: django_content_type; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.django_content_type (
+    id integer NOT NULL,
+    app_label character varying(100) NOT NULL,
+    model character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public.django_content_type OWNER TO ipno;
+
+--
+-- Name: django_content_type_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.django_content_type_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.django_content_type_id_seq OWNER TO ipno;
+
+--
+-- Name: django_content_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.django_content_type_id_seq OWNED BY public.django_content_type.id;
+
+
+--
+-- Name: django_migrations; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.django_migrations (
+    id integer NOT NULL,
+    app character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    applied timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.django_migrations OWNER TO ipno;
+
+--
+-- Name: django_migrations_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.django_migrations_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.django_migrations_id_seq OWNER TO ipno;
+
+--
+-- Name: django_migrations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.django_migrations_id_seq OWNED BY public.django_migrations.id;
+
+
+--
+-- Name: django_rest_passwordreset_resetpasswordtoken; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.django_rest_passwordreset_resetpasswordtoken (
+    created_at timestamp with time zone NOT NULL,
+    key character varying(64) NOT NULL,
+    ip_address inet,
+    user_agent character varying(256) NOT NULL,
+    user_id integer NOT NULL,
+    id integer NOT NULL
+);
+
+
+ALTER TABLE public.django_rest_passwordreset_resetpasswordtoken OWNER TO ipno;
+
+--
+-- Name: django_rest_passwordreset_resetpasswordtoken_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
+--
+
+CREATE SEQUENCE public.django_rest_passwordreset_resetpasswordtoken_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.django_rest_passwordreset_resetpasswordtoken_id_seq OWNER TO ipno;
+
+--
+-- Name: django_rest_passwordreset_resetpasswordtoken_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
+--
+
+ALTER SEQUENCE public.django_rest_passwordreset_resetpasswordtoken_id_seq OWNED BY public.django_rest_passwordreset_resetpasswordtoken.id;
+
+
+--
+-- Name: django_session; Type: TABLE; Schema: public; Owner: ipno
+--
+
+CREATE TABLE public.django_session (
+    session_key character varying(40) NOT NULL,
+    session_data text NOT NULL,
+    expire_date timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE public.django_session OWNER TO ipno;
 
 --
 -- Name: documents_document; Type: TABLE; Schema: public; Owner: ipno
@@ -377,6 +1208,8 @@ CREATE TABLE public.documents_document (
 );
 
 
+ALTER TABLE public.documents_document OWNER TO ipno;
+
 --
 -- Name: documents_document_departments; Type: TABLE; Schema: public; Owner: ipno
 --
@@ -387,6 +1220,8 @@ CREATE TABLE public.documents_document_departments (
     department_id integer NOT NULL
 );
 
+
+ALTER TABLE public.documents_document_departments OWNER TO ipno;
 
 --
 -- Name: documents_document_departments_id_seq; Type: SEQUENCE; Schema: public; Owner: ipno
@@ -400,6 +1235,8 @@ CREATE SEQUENCE public.documents_document_departments_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
+ALTER TABLE public.documents_document_departments_id_seq OWNER TO ipno;
 
 --
 -- Name: documents_document_departments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
@@ -420,11 +1257,15 @@ CREATE SEQUENCE public.documents_document_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
+ALTER TABLE public.documents_document_id_seq OWNER TO ipno;
+
 --
 -- Name: documents_document_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
 --
 
 ALTER SEQUENCE public.documents_document_id_seq OWNED BY public.documents_document.id;
+
 
 --
 -- Name: documents_document_officers; Type: TABLE; Schema: public; Owner: ipno
@@ -451,6 +1292,8 @@ CREATE SEQUENCE public.documents_document_officers_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
+ALTER TABLE public.documents_document_officers_id_seq OWNER TO ipno;
 
 --
 -- Name: documents_document_officers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipno
@@ -3686,3 +4529,4 @@ ALTER TABLE ONLY public.use_of_forces_useofforce
 --
 -- PostgreSQL database dump complete
 --
+
