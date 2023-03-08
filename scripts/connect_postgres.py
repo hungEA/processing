@@ -1,3 +1,4 @@
+import os
 import psycopg2
 
 #establishing the connection
@@ -17,9 +18,11 @@ print("Connection established to: ", data)
 
 cursor.close()
 
+print(os.listdir('.'))
+
 cursor = conn.cursor()
 cursor.execute('CREATE USER ipno')
-cursor.execute(open("../dvc/sql/be_schema.sql", "r").read())
+cursor.execute(open("dvc/sql/be_schema.sql", "r").read())
 
 cursor.close()
 
