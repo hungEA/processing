@@ -8,7 +8,7 @@ AGENCY_COLS = {'agency_slug', 'agency_name', 'location'}
 
 
 def __retrieve_wrgl_data(branch=None):
-    repo = Repository("https://wrgl.llead.co/")
+    repo = Repository("https://wrgl.llead.co/", None)
 
     # new_commit = repo.get_branch("agency-reference-list")
 
