@@ -15,5 +15,13 @@ cursor.execute("select version()")
 data = cursor.fetchone()
 print("Connection established to: ", data)
 
+cursor.close()
+
+cursor = conn.cursor()
+cursor.execute('CREATE USER ipno')
+cursor.execute(open("../dvc/sql/be_schema.sql", "r").read())
+
+cursor.close()
+
 #Closing the connection
 conn.close()
