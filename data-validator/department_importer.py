@@ -17,9 +17,10 @@ def __retrieve_wrgl_data(branch=None):
     columns = original_commit.table.columns
     assert set(columns) == AGENCY_COLS
 
-    result = repo.diff(original_commit, None)
+    # result = repo.diff(original_commit, None)
+    result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')
 
-    added_rows = columns
+    added_rows = []
     with tqdm(
         total=len(result), desc="Downloading created data"
     ) as pbar:
