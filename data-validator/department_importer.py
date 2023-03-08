@@ -12,7 +12,7 @@ def __retrieve_wrgl_data(branch=None):
 
     # new_commit = repo.get_branch("agency-reference-list")
 
-    original_commit = repo.get_commit("596ae27e2528559798f416348529a35c")
+    original_commit = repo.get_commit("a6ef318b18113d2661ff966fdf4972f0")
 
     columns = original_commit.table.columns
     assert set(columns) == AGENCY_COLS
