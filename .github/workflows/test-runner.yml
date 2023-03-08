@@ -33,7 +33,7 @@ jobs:
       - name: Connect sqlite
         run: python scripts/create_sqlite.py
       - name: Connect postgres db
-        run: python scripts/connect_postgres.py
+        run: python data-validator/setup_be_db.py
         env:
           # The hostname used to communicate with the PostgreSQL service container
           POSTGRES_HOST: localhost
