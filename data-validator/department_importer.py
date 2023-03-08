@@ -7,7 +7,7 @@ from wrgl import Repository
 AGENCY_COLS = {'agency_slug', 'agency_name', 'location'}
 
 
-def __retrieve_wrgl_data(self, branch=None):
+def __retrieve_wrgl_data(branch=None):
     repo = Repository("https://wrgl.llead.co/")
 
     # new_commit = repo.get_branch("agency-reference-list")
