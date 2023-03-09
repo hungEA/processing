@@ -49,6 +49,15 @@ def __retrieve_officer_frm_wrgl_data(branch=None):
     print(df.head(10))
 
 
+def __preprocess_officer(agency_df):
+    df = pd.read_csv('officer.csv')
+
+    result = pd.merge(df, agency_df, how='left', on='agency')
+
+    result.to_csv('officer.csv', index=False)
+
+
+
 def import_officer(conn):
     # cursor = conn.cursor()
     # cursor.execute("""SELECT table_name FROM information_schema.tables
@@ -60,6 +69,11 @@ def import_officer(conn):
 
     __retrieve_officer_frm_wrgl_data()
 
+
+    agency_df = pd.read_sql('SELECT id, agency_slug FROM departments_department', conn)
+    agency_df.columns = ['department_id', 'agency']
+    __preprocess_officer(agency_df)
+
     # data = pd.read_csv('agency.csv')
     # data.to_sql('departments_department', con=conn, if_exists='replace', index=False)
     cursor = conn.cursor()
@@ -67,7 +81,7 @@ def import_officer(conn):
         sql="""
             COPY officers_officer(
                 uid, last_name, middle_name, first_name, birth_year,
-                birth_month, birth_day, race, sex, agency
+                birth_month, birth_day, race, sex, agency, department_id
             ) FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
@@ -78,7 +92,7 @@ def import_officer(conn):
 
     df = pd.read_sql('''
         SELECT uid, last_name, middle_name, first_name, birth_year,
-                birth_month, birth_day, race, sex, agency
+                birth_month, birth_day, race, sex, agency, department_id
         FROM officers_officer
         ''',
         con=conn
