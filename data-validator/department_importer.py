@@ -45,7 +45,15 @@ def __retrieve_wrgl_data(branch=None):
 
 
 def import_department(conn):
-    data = __retrieve_wrgl_data()
+    cursor = conn.cursor()
+    cursor.execute("""SELECT table_name FROM information_schema.tables
+       WHERE table_schema = 'public'""")
+    for table in cursor.fetchall():
+        print(table)
+
+    cursor.close()
+
+    __retrieve_wrgl_data()
 
     # data = pd.read_csv('agency.csv')
     # data.to_sql('departments_department', con=conn, if_exists='replace', index=False)
