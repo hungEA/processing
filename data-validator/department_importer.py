@@ -60,7 +60,8 @@ def import_department(conn):
     cursor = conn.cursor()
     cursor.copy_from(
         open('agency.csv', 'r'),
-        'departments_department',
+        schema='public',
+        table='departments_department',
         sep=','
     )
     cursor.close()
