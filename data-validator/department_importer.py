@@ -41,17 +41,19 @@ def __retrieve_wrgl_data(branch=None):
     df.columns = df.iloc[0]
     df = df.iloc[1:].reset_index(drop=True)
 
-    df.to_csv('agency.csv')
+    df.to_csv('agency.csv', index=False)
+
+    print(df.head(10))
 
 
 def import_department(conn):
-    cursor = conn.cursor()
-    cursor.execute("""SELECT table_name FROM information_schema.tables
-       WHERE table_schema = 'public'""")
-    for table in cursor.fetchall():
-        print(table)
+    # cursor = conn.cursor()
+    # cursor.execute("""SELECT table_name FROM information_schema.tables
+    #    WHERE table_schema = 'public'""")
+    # for table in cursor.fetchall():
+    #     print(table)
 
-    cursor.close()
+    # cursor.close()
 
     __retrieve_wrgl_data()
 
@@ -60,7 +62,7 @@ def import_department(conn):
     cursor = conn.cursor()
     cursor.copy_expert(
         sql="""
-            COPY departments_department FROM stdin WITH CSV HEADER
+            COPY departments_department(agency_slug, agency_name, location) FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
         file=open('agency.csv', 'r'),
