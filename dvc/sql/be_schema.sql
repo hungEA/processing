@@ -1907,8 +1907,8 @@ ALTER SEQUENCE public.officers_event_id_seq OWNED BY public.officers_event.id;
 
 CREATE TABLE public.officers_officer (
     id integer NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     uid character varying(255) NOT NULL,
     last_name character varying(255),
     middle_name character varying(255),
@@ -1918,11 +1918,11 @@ CREATE TABLE public.officers_officer (
     birth_day integer,
     race character varying(255),
     person_id integer,
-    is_name_changed boolean NOT NULL,
+    -- is_name_changed boolean NOT NULL,
     sex character varying(255),
     agency character varying(255),
     department_id integer,
-    aliases character varying(255)[],
+    -- aliases character varying(255)[],
     complaint_fraction double precision
 );
 

@@ -4,18 +4,21 @@ import pandas as pd
 from wrgl import Repository
 
 
-AGENCY_COLS = {'agency_slug', 'agency_name', 'location'}
+OFFICER_COLS = {
+    'uid', 'last_name', 'middle_name', 'first_name', 'birth_year',
+    'birth_month', 'birth_day', 'race', 'sex', 'agency'
+}
 
 
-def __retrieve_wrgl_data(branch=None):
+def __retrieve_officer_frm_wrgl_data(branch=None):
     repo = Repository("https://wrgl.llead.co/", None)
 
     # new_commit = repo.get_branch("agency-reference-list")
 
-    original_commit = repo.get_commit("f1da4673f07cd7c093b9185b09399537")
+    original_commit = repo.get_commit("9e82d17d64a7950c731031a3e8124815")
 
     columns = original_commit.table.columns
-    assert set(columns) == AGENCY_COLS
+    assert set(columns) == OFFICER_COLS
 
     # result = repo.diff(original_commit, None)
     # result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')
@@ -36,17 +39,17 @@ def __retrieve_wrgl_data(branch=None):
     #         pbar.update(1000)
 
     # df = pd.DataFrame(added_rows)
-    all_rows = list(repo.get_blocks("f1da4673f07cd7c093b9185b09399537"))
+    all_rows = list(repo.get_blocks("9e82d17d64a7950c731031a3e8124815"))
     df = pd.DataFrame(all_rows)
     df.columns = df.iloc[0]
     df = df.iloc[1:].reset_index(drop=True)
 
-    df.to_csv('agency.csv', index=False)
+    df.to_csv('officer.csv', index=False)
 
     print(df.head(10))
 
 
-def import_department(conn):
+def import_officer(conn):
     # cursor = conn.cursor()
     # cursor.execute("""SELECT table_name FROM information_schema.tables
     #    WHERE table_schema = 'public'""")
@@ -55,21 +58,30 @@ def import_department(conn):
 
     # cursor.close()
 
-    __retrieve_wrgl_data()
+    __retrieve_officer_frm_wrgl_data()
 
     # data = pd.read_csv('agency.csv')
     # data.to_sql('departments_department', con=conn, if_exists='replace', index=False)
     cursor = conn.cursor()
     cursor.copy_expert(
         sql="""
-            COPY departments_department(agency_slug, agency_name, location) FROM stdin WITH CSV HEADER
+            COPY officers_officer(
+                uid, last_name, middle_name, first_name, birth_year,
+                birth_month, birth_day, race, sex, agency
+            ) FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
-        file=open('agency.csv', 'r'),
+        file=open('officer.csv', 'r'),
     )
     conn.commit()
     cursor.close()
 
-    df = pd.read_sql('SELECT agency_slug, agency_name, location FROM departments_department', con=conn)
+    df = pd.read_sql('''
+        SELECT uid, last_name, middle_name, first_name, birth_year,
+                birth_month, birth_day, race, sex, agency
+        FROM officers_officer
+        ''',
+        con=conn
+    )
 
     print(df.head(10))
