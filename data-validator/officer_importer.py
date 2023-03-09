@@ -54,6 +54,7 @@ def __preprocess_officer(agency_df):
 
     result = pd.merge(df, agency_df, how='left', on='agency')
 
+    result = result.astype({'department_id': int})
     result.to_csv('officer.csv', index=False)
 
 
