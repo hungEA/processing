@@ -23,11 +23,16 @@ cursor.close()
 print(os.listdir('.'))
 
 cursor = conn.cursor()
-cursor.execute('CREATE USER ipno')
+cursor.execute("CREATE USER ipno WITH PASSWORD 'postgres'")
 cursor.execute(open("dvc/sql/be_schema.sql", "r").read())
 
 conn.commit()
 cursor.close()
+conn.close()
+
+conn = psycopg2.connect(
+   database="postgres", user='ipno', password='postgres', host='localhost', port= '5432'
+)
 
 import_department(conn)
 
