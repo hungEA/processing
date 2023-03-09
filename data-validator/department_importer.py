@@ -47,8 +47,15 @@ def __retrieve_wrgl_data(branch=None):
 def import_department(conn):
     data = __retrieve_wrgl_data()
 
-    data = pd.read_csv('agency.csv')
-    data.to_sql('departments_department', con=conn, if_exists='replace', index=False)
+    # data = pd.read_csv('agency.csv')
+    # data.to_sql('departments_department', con=conn, if_exists='replace', index=False)
+    cursor = conn.cursor()
+    cursor.copy_from(
+        open('agency.csv', 'r'),
+        'departments_department',
+        sep=','
+    )
+    cursor.close()
 
     df = pd.read_sql('SELECT * FROM departments_department', con=conn)
 

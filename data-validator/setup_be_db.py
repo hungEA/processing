@@ -28,8 +28,8 @@ cursor.execute(open("dvc/sql/be_schema.sql", "r").read())
 
 cursor.close()
 
+import_department(conn)
+
+
 #Closing the connection
 conn.close()
-
-
-import_department(conn)
