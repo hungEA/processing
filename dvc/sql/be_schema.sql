@@ -659,8 +659,8 @@ ALTER SEQUENCE public.data_wrglrepo_id_seq OWNED BY public.data_wrglrepo.id;
 
 CREATE TABLE public.departments_department (
     id integer NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     agency_name character varying(255) NOT NULL,
     city character varying(255),
     parish character varying(255),
@@ -4529,4 +4529,3 @@ ALTER TABLE ONLY public.use_of_forces_useofforce
 --
 -- PostgreSQL database dump complete
 --
-
