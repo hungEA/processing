@@ -58,12 +58,14 @@ def import_department(conn):
     # data = pd.read_csv('agency.csv')
     # data.to_sql('departments_department', con=conn, if_exists='replace', index=False)
     cursor = conn.cursor()
-    cursor.copy_from(
-        open('agency.csv', 'r'),
-        schema='public',
-        table='departments_department',
-        sep=','
+    cursor.copy_expert(
+        sql="""
+            COPY departments_department FROM stdin WITH CSV HEADER
+            DELIMITER as ','
+        """,
+        file=open('agency.csv', 'r'),
     )
+    conn.commit()
     cursor.close()
 
     df = pd.read_sql('SELECT * FROM departments_department', con=conn)

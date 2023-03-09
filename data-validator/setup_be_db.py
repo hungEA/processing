@@ -26,6 +26,7 @@ cursor = conn.cursor()
 cursor.execute('CREATE USER ipno')
 cursor.execute(open("dvc/sql/be_schema.sql", "r").read())
 
+conn.commit()
 cursor.close()
 
 import_department(conn)
