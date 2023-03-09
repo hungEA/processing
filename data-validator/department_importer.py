@@ -18,33 +18,36 @@ def __retrieve_wrgl_data(branch=None):
     assert set(columns) == AGENCY_COLS
 
     # result = repo.diff(original_commit, None)
-    result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')
+    # result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')
 
-    added_rows = []
-    with tqdm(
-        total=len(result), desc="Downloading created data"
-    ) as pbar:
-        for i in range(0, len(result), 1000):
-            added_rows.extend(
-                list(
-                    repo.get_table_rows(
-                        original_commit.table.sum,
-                        result[i : i + 1000],
-                    )
-                )
-            )
-            pbar.update(1000)
+    # added_rows = []
+    # with tqdm(
+    #     total=len(result), desc="Downloading created data"
+    # ) as pbar:
+    #     for i in range(0, len(result), 1000):
+    #         added_rows.extend(
+    #             list(
+    #                 repo.get_table_rows(
+    #                     original_commit.table.sum,
+    #                     result[i : i + 1000],
+    #                 )
+    #             )
+    #         )
+    #         pbar.update(1000)
 
-    df = pd.DataFrame(added_rows)
+    # df = pd.DataFrame(added_rows)
+    all_rows = list(repo.get_blocks("a6ef318b18113d2661ff966fdf4972f0"))
+    df = pd.DataFrame(all_rows)
     df.columns = df.iloc[0]
     df = df.iloc[1:].reset_index(drop=True)
 
-    return df
-
+    df.to_csv('agency.csv')
 
 
 def import_department(conn):
     data = __retrieve_wrgl_data()
+
+    data = pd.read_csv('agency.csv')
     data.to_sql('departments_department', con=conn, if_exists='replace', index=False)
 
     df = pd.read_sql('SELECT * FROM departments_department', con=conn)
