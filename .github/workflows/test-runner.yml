@@ -26,6 +26,7 @@ jobs:
         ports:
           - 5432:5432
 
+    environment: SLACK_CONFIG
     steps:
       - uses: actions/checkout@v3
       - name: Install slack package
