@@ -63,7 +63,7 @@ def __preprocess_officer(agency_df):
 
         client.files_upload(
             channels=os.environ.get('SLACK_CHANNEL'),
-            title="Test data-validation",
+            title="Null agency of officers",
             file="./null_agency_of_officers.csv",
             initial_comment="The following file provides a list of personnels that cannot map to agency:",
         )
@@ -72,7 +72,12 @@ def __preprocess_officer(agency_df):
 
     result.dropna(subset=['department_id'], inplace=True)
 
-    result = result.astype({'department_id': int, 'birth_year': pd.Int64Dtype()})
+    result = result.astype({
+        'department_id': int,
+        'birth_year': pd.Int64Dtype(),
+        'birth_month': pd.Int64Dtype(),
+        'birth_day': pd.Int64Dtype()
+    })
     result.to_csv('officer.csv', index=False)
 
 
