@@ -61,9 +61,6 @@ def __preprocess_officer(agency_df):
         client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
         null_data.to_csv('null_agency_of_officers.csv', index=False)
 
-        print('Check slack channel')
-        print(os.environ.get('SLACK_CHANNEL'))
-
         client.files_upload(
             channels=os.environ.get('SLACK_CHANNEL'),
             title="Test data-validation",
@@ -71,11 +68,12 @@ def __preprocess_officer(agency_df):
             initial_comment="The following file provides a list of personnels that cannot map to agency:",
         )
 
-        raise Exception('Cannot map officer to agency')
+        # raise Exception('Cannot map officer to agency')
+
+    result.dropna(subset=['department_id'], inplace=True)
 
     result = result.astype({'department_id': int})
     result.to_csv('officer.csv', index=False)
-
 
 
 def import_officer(conn):
