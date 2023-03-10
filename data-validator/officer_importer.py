@@ -58,11 +58,11 @@ def __preprocess_officer(agency_df):
     print('Check agency id after merged')
     null_data = result[result['department_id'].isnull()]
     if len(null_data) > 0:
-        client = WebClient('xoxb-2569461153-4863086852928-rTzubiZTtrZAIWbN6MTw4BFc')
+        client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
         null_data.to_csv('null_agency_of_officers.csv', index=False)
 
         client.files_upload(
-            channels="C044F7LTASV",
+            channels=os.environ.get('SLACK_CHANNEL'),
             title="Test data-validation",
             file="./null_agency_of_officers.csv",
             initial_comment="The following file provides a list of personnels that cannot map to agency:",
