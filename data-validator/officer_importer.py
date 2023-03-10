@@ -2,6 +2,7 @@ import os
 import pandas as pd
 # from tqdm import tqdm
 from wrgl import Repository
+from slack_sdk import WebClient
 
 
 OFFICER_COLS = {
@@ -55,7 +56,19 @@ def __preprocess_officer(agency_df):
     result = pd.merge(df, agency_df, how='left', on='agency')
 
     print('Check agency id after merged')
-    print(result[result['department_id'].isnull()])
+    null_data = result[result['department_id'].isnull()]
+    if len(null_data) > 0:
+        client = WebClient('xoxb-2569461153-4863086852928-rTzubiZTtrZAIWbN6MTw4BFc')
+        null_data.to_csv('null_agency_of_officers.csv', index=False)
+
+        client.files_upload(
+            channels="C044F7LTASV",
+            title="Test data-validation",
+            file="./null_agency_of_officers.csv",
+            initial_comment="The following file provides a list of personnels that cannot map to agency:",
+        )
+
+        raise Exception('Cannot map officer to agency')
 
     result = result.astype({'department_id': int})
     result.to_csv('officer.csv', index=False)
