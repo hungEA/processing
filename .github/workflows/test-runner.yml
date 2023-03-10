@@ -31,7 +31,9 @@ jobs:
       - name: Install slack package
         run: pip install slack_sdk==3.19.5
       - name: Check slack channel
-        run: echo "${SLACK_CHANNEL}"
+        run: |
+          echo "${SLACK_CHANNEL}" > secret.txt
+          cat secret.txt
         env:
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
       - name: Connect sqlite
