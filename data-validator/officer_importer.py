@@ -61,6 +61,9 @@ def __preprocess_officer(agency_df):
         client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
         null_data.to_csv('null_agency_of_officers.csv', index=False)
 
+        print('Check slack channel')
+        print(os.environ.get('SLACK_CHANNEL'))
+
         client.files_upload(
             channels=os.environ.get('SLACK_CHANNEL'),
             title="Test data-validation",
