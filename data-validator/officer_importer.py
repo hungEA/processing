@@ -54,6 +54,9 @@ def __preprocess_officer(agency_df):
 
     result = pd.merge(df, agency_df, how='left', on='agency')
 
+    print('Check agency id after merged')
+    print(result[result['department_id'].isnull()])
+
     result = result.astype({'department_id': int})
     result.to_csv('officer.csv', index=False)
 
@@ -73,6 +76,9 @@ def import_officer(conn):
 
     agency_df = pd.read_sql('SELECT id, agency_slug FROM departments_department', conn)
     agency_df.columns = ['department_id', 'agency']
+    print('Check agency id')
+    print(agency_df[agency_df['agency'].isnull()])
+
     __preprocess_officer(agency_df)
 
     # data = pd.read_csv('agency.csv')
