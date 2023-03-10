@@ -72,7 +72,7 @@ def __preprocess_officer(agency_df):
 
     result.dropna(subset=['department_id'], inplace=True)
 
-    result = result.astype({'department_id': int})
+    result = result.astype({'department_id': int, 'birth_year': pd.Int64Dtype()})
     result.to_csv('officer.csv', index=False)
 
 
