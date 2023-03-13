@@ -1,4 +1,5 @@
 import os
+import sys
 import pandas as pd
 # from tqdm import tqdm
 from wrgl import Repository
@@ -93,16 +94,29 @@ def import_complaint(conn):
     print(complaint_df.columns)
 
     cursor = conn.cursor()
-    cursor.copy_expert(
-        sql="""
-            COPY complaints_complaint(
-                uid, tracking_id, allegation_uid, allegation,
-                disposition, action, agency, allegation_desc
-            ) FROM stdin WITH CSV HEADER
-            DELIMITER as ','
-        """,
-        file=open('complaint.csv', 'r'),
-    )
+    try:
+        cursor.copy_expert(
+            sql="""
+                COPY complaints_complaint(
+                    uid, tracking_id, allegation_uid, allegation,
+                    disposition, action, agency, allegation_desc
+                ) FROM stdin WITH CSV HEADER
+                DELIMITER as ','
+            """,
+            file=open('complaint.csv', 'r'),
+        )
+    except Exception as e:
+        print(e)
+        client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
+
+        client.files_upload(
+            channels=os.environ.get('SLACK_CHANNEL'),
+            title="Complaint",
+            file="./complaint.csv",
+            initial_comment="The following file provides a list of personnels that contain errors:",
+        )
+        sys.exit(True)
+
     conn.commit()
     cursor.close()
 
