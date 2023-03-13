@@ -47,8 +47,6 @@ def __retrieve_officer_frm_wrgl_data(branch=None):
 
     df.to_csv('officer.csv', index=False)
 
-    print(df.head(10))
-
 
 def __preprocess_officer(agency_df):
     df = pd.read_csv('officer.csv')
@@ -95,8 +93,8 @@ def import_officer(conn):
 
     agency_df = pd.read_sql('SELECT id, agency_slug FROM departments_department', conn)
     agency_df.columns = ['department_id', 'agency']
-    print('Check agency id')
-    print(agency_df[agency_df['agency'].isnull()])
+    # print('Check agency id')
+    # print(agency_df[agency_df['agency'].isnull()])
 
     __preprocess_officer(agency_df)
 
@@ -124,4 +122,5 @@ def import_officer(conn):
         con=conn
     )
 
+    print('List top 10 officers')
     print(df.head(10))
