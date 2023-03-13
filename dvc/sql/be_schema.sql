@@ -427,8 +427,8 @@ ALTER SEQUENCE public.citizens_citizen_id_seq OWNED BY public.citizens_citizen.i
 
 CREATE TABLE public.complaints_complaint (
     id integer NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     action character varying(255),
     disposition character varying(255),
     allegation text,
