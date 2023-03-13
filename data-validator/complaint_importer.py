@@ -73,7 +73,7 @@ def __build_complaints_officers_rel(conn):
     print(null_data[['allegation_uid', 'uid']])
     if len(null_data) > 0:
         client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
-        null_data.to_csv('null_officer_of_complaint.csv', index=False)
+        null_data.to_csv('null_officers_of_complaints.csv', index=False)
 
         client.files_upload(
             channels=os.environ.get('SLACK_CHANNEL'),
