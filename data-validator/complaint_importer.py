@@ -64,7 +64,7 @@ def __build_complaints_officers_rel(conn):
         'SELECT id, uid FROM officers_officer',
         con=conn
     )
-    officers_df.columns = ['officer_id, uid']
+    officers_df.columns = ['officer_id', 'uid']
 
     result = pd.merge(complaints_df, officers_df, how='left', on='uid')
 
