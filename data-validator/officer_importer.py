@@ -70,6 +70,7 @@ def __preprocess_officer(agency_df):
 
         # raise Exception('Cannot map officer to agency')
 
+    # Temporarily drop NA to continue, otherwise, comment out this statement
     result.dropna(subset=['department_id'], inplace=True)
 
     result = result.astype({
