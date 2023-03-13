@@ -47,6 +47,7 @@ def __retrieve_complaint_frm_wrgl_data():
     df.columns = df.iloc[0]
     df = df.iloc[1:].reset_index(drop=True)
 
+    df = df.loc[:, COMPLAINT_COLS]
     df.to_csv('complaint.csv', index=False)
 
 
@@ -87,6 +88,9 @@ def __build_complaints_officers_rel(conn):
 
 def import_complaint(conn):
     __retrieve_complaint_frm_wrgl_data()
+
+    complaint_df = pd.read_csv('complaint.csv')
+    print(complaint_df.columns)
 
     cursor = conn.cursor()
     cursor.copy_expert(
