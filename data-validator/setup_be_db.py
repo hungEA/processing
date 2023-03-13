@@ -3,6 +3,7 @@ import psycopg2
 
 from department_importer import import_department
 from officer_importer import import_officer
+from complaint_importer import import_complaint
 
 #establishing the connection
 print("Connecting to postgres...")
