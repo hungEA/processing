@@ -70,6 +70,7 @@ def __build_complaints_officers_rel(conn):
 
     print('Check officer id after merged')
     null_data = result[result['officer_id'].isnull()]
+    print(null_data)
     if len(null_data) > 0:
         client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
         null_data.to_csv('null_officer_of_complaint.csv', index=False)
@@ -78,10 +79,10 @@ def __build_complaints_officers_rel(conn):
         #     channels=os.environ.get('SLACK_CHANNEL'),
         #     title="Null agency of officers",
         #     file="./null_agency_of_officers.csv",
-        #     initial_comment="The following file provides a list of personnels that cannot map to agency:",
+        #     initial_comment="The following file provides a list of personnels that cannot map to complaint:",
         # )
 
-        raise Exception('Cannot map officer to agency')
+        raise Exception('Cannot map officer to complaint')
 
     result = result.loc[:, ["complaint_id", "officer_id"]]
     result.to_csv('complaints_officers_rel.csv', index=False)
