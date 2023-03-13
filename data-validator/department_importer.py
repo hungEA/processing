@@ -15,7 +15,7 @@ def __retrieve_wrgl_data(branch=None):
     original_commit = repo.get_commit("f1da4673f07cd7c093b9185b09399537")
 
     columns = original_commit.table.columns
-    assert set(columns) == AGENCY_COLS
+    assert AGENCY_COLS in set(columns)
 
     # result = repo.diff(original_commit, None)
     # result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')
