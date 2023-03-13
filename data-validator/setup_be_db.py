@@ -37,6 +37,7 @@ conn = psycopg2.connect(
 
 import_department(conn)
 import_officer(conn)
+import_complaint(conn)
 
 
 #Closing the connection
