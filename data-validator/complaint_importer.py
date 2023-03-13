@@ -75,12 +75,12 @@ def __build_complaints_officers_rel(conn):
         client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
         null_data.to_csv('null_officer_of_complaint.csv', index=False)
 
-        # client.files_upload(
-        #     channels=os.environ.get('SLACK_CHANNEL'),
-        #     title="Null agency of officers",
-        #     file="./null_agency_of_officers.csv",
-        #     initial_comment="The following file provides a list of personnels that cannot map to complaint:",
-        # )
+        client.files_upload(
+            channels=os.environ.get('SLACK_CHANNEL'),
+            title="Null officers of complaints",
+            file="./null_officers_of_complaints.csv",
+            initial_comment="The following file provides a list of personnels that cannot map to complaint:",
+        )
 
         raise Exception('Cannot map officer to complaint')
 
