@@ -15,7 +15,8 @@ def __retrieve_wrgl_data(branch=None):
     original_commit = repo.get_commit("f1da4673f07cd7c093b9185b09399537")
 
     columns = original_commit.table.columns
-    assert AGENCY_COLS in set(columns)
+    if not AGENCY_COLS in set(columns):
+        raise Exception('BE agency columns are not recognized in the current commit')
 
     # result = repo.diff(original_commit, None)
     # result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')
@@ -43,7 +44,7 @@ def __retrieve_wrgl_data(branch=None):
 
     df.to_csv('agency.csv', index=False)
 
-    print(df.head(10))
+    # print(df.head(10))
 
 
 def import_department(conn):
@@ -72,4 +73,5 @@ def import_department(conn):
 
     df = pd.read_sql('SELECT agency_slug, agency_name, location FROM departments_department', con=conn)
 
+    print('List top 10 agency')
     print(df.head(10))

@@ -19,7 +19,8 @@ def __retrieve_officer_frm_wrgl_data(branch=None):
     original_commit = repo.get_commit("9e82d17d64a7950c731031a3e8124815")
 
     columns = original_commit.table.columns
-    assert OFFICER_COLS in set(columns)
+    if not OFFICER_COLS in set(columns):
+        raise Exception('BE officer columns are not recognized in the current commit')
 
     # result = repo.diff(original_commit, None)
     # result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')

@@ -19,7 +19,8 @@ def __retrieve_complaint_frm_wrgl_data(branch=None):
     original_commit = repo.get_commit("9e82d17d64a7950c731031a3e8124815")
 
     columns = original_commit.table.columns
-    assert COMPLAINT_COLS in set(columns)
+    if not COMPLAINT_COLS in set(columns):
+        raise Exception('BE complaint columns are not recognized in the current commit')
 
     # result = repo.diff(original_commit, None)
     # result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')
@@ -114,3 +115,7 @@ def import_complaint(conn):
     )
     conn.commit()
     cursor.close()
+
+    cursor = conn.cursor()
+    count = cursor.execute('SELECT COUNT(*) FROM complaints_complaint_officers')
+    print('Number of records in complaints_officers rel', count.iloc[0])
