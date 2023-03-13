@@ -19,7 +19,7 @@ def __retrieve_complaint_frm_wrgl_data(branch=None):
     original_commit = repo.get_commit("9e82d17d64a7950c731031a3e8124815")
 
     columns = original_commit.table.columns
-    if not COMPLAINT_COLS in set(columns):
+    if not COMPLAINT_COLS.issubset(set(columns)):
         raise Exception('BE complaint columns are not recognized in the current commit')
 
     # result = repo.diff(original_commit, None)

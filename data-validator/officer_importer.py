@@ -19,7 +19,7 @@ def __retrieve_officer_frm_wrgl_data(branch=None):
     original_commit = repo.get_commit("9e82d17d64a7950c731031a3e8124815")
 
     columns = original_commit.table.columns
-    if not OFFICER_COLS in set(columns):
+    if not OFFICER_COLS.issubset(set(columns)):
         raise Exception('BE officer columns are not recognized in the current commit')
 
     # result = repo.diff(original_commit, None)
