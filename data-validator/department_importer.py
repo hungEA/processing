@@ -4,7 +4,7 @@ import pandas as pd
 from wrgl import Repository
 
 
-AGENCY_COLS = {'agency_slug', 'agency_name', 'location'}
+AGENCY_COLS = ['agency_slug', 'agency_name', 'location']
 
 
 def __retrieve_wrgl_data(branch=None):
@@ -15,7 +15,7 @@ def __retrieve_wrgl_data(branch=None):
     original_commit = repo.get_branch("agency-reference-list")
 
     columns = original_commit.table.columns
-    if not AGENCY_COLS.issubset(set(columns)):
+    if not set(AGENCY_COLS).issubset(set(columns)):
         raise Exception('BE agency columns are not recognized in the current commit')
 
     # result = repo.diff(original_commit, None)

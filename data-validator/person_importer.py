@@ -5,7 +5,7 @@ from wrgl import Repository
 from slack_sdk import WebClient
 
 
-PERSON_COLS = {'person_id', 'canonical_uid', 'uids'}
+PERSON_COLS = ['person_id', 'canonical_uid', 'uids']
 
 
 def __retrieve_person_frm_wrgl_data(branch=None):
@@ -16,7 +16,7 @@ def __retrieve_person_frm_wrgl_data(branch=None):
     original_commit = repo.get_branch("person")
 
     columns = original_commit.table.columns
-    if not PERSON_COLS.issubset(set(columns)):
+    if not set(PERSON_COLS).issubset(set(columns)):
         raise Exception('BE person columns are not recognized in the current commit')
 
     all_rows = list(repo.get_blocks("heads/person"))

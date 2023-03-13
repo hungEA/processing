@@ -6,10 +6,10 @@ from wrgl import Repository
 from slack_sdk import WebClient
 
 
-COMPLAINT_COLS = {
+COMPLAINT_COLS = [
     'uid', 'tracking_id', 'allegation_uid', 'allegation',
     'disposition', 'action', 'agency', 'allegation_desc'
-}
+]
 
 
 def __retrieve_complaint_frm_wrgl_data():
@@ -21,7 +21,7 @@ def __retrieve_complaint_frm_wrgl_data():
     original_commit = repo.get_branch("allegation")
 
     columns = original_commit.table.columns
-    if not COMPLAINT_COLS.issubset(set(columns)):
+    if not set(COMPLAINT_COLS).issubset(set(columns)):
         raise Exception('BE complaint columns are not recognized in the current commit')
 
     # result = repo.diff(original_commit, None)

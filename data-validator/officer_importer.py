@@ -5,10 +5,10 @@ from wrgl import Repository
 from slack_sdk import WebClient
 
 
-OFFICER_COLS = {
+OFFICER_COLS = [
     'uid', 'last_name', 'middle_name', 'first_name', 'birth_year',
     'birth_month', 'birth_day', 'race', 'sex', 'agency'
-}
+]
 
 
 def __retrieve_officer_frm_wrgl_data(branch=None):
@@ -19,7 +19,7 @@ def __retrieve_officer_frm_wrgl_data(branch=None):
     original_commit = repo.get_branch("personnel")
 
     columns = original_commit.table.columns
-    if not OFFICER_COLS.issubset(set(columns)):
+    if not set(OFFICER_COLS).issubset(set(columns)):
         raise Exception('BE officer columns are not recognized in the current commit')
 
     # result = repo.diff(original_commit, None)
