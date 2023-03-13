@@ -12,7 +12,7 @@ def __retrieve_wrgl_data(branch=None):
 
     # new_commit = repo.get_branch("agency-reference-list")
 
-    original_commit = repo.get_commit("agency-reference-list")
+    original_commit = repo.get_branch("agency-reference-list")
 
     columns = original_commit.table.columns
     if not AGENCY_COLS.issubset(set(columns)):

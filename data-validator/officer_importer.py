@@ -16,7 +16,7 @@ def __retrieve_officer_frm_wrgl_data(branch=None):
 
     # new_commit = repo.get_branch("agency-reference-list")
 
-    original_commit = repo.get_commit("personnel")
+    original_commit = repo.get_branch("personnel")
 
     columns = original_commit.table.columns
     if not OFFICER_COLS.issubset(set(columns)):
