@@ -13,13 +13,13 @@ def __retrieve_person_frm_wrgl_data(branch=None):
 
     # new_commit = repo.get_branch("agency-reference-list")
 
-    original_commit = repo.get_commit("9e82d17d64a7950c731031a3e8124815")
+    original_commit = repo.get_commit("person")
 
     columns = original_commit.table.columns
     if not PERSON_COLS.issubset(set(columns)):
         raise Exception('BE person columns are not recognized in the current commit')
 
-    all_rows = list(repo.get_blocks("9e82d17d64a7950c731031a3e8124815"))
+    all_rows = list(repo.get_blocks("heads/person"))
     df = pd.DataFrame(all_rows)
     df.columns = df.iloc[0]
     df = df.iloc[1:].reset_index(drop=True)

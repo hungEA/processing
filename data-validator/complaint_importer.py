@@ -11,12 +11,13 @@ COMPLAINT_COLS = {
 }
 
 
-def __retrieve_complaint_frm_wrgl_data(branch=None):
+def __retrieve_complaint_frm_wrgl_data():
     repo = Repository("https://wrgl.llead.co/", None)
 
     # new_commit = repo.get_branch("agency-reference-list")
 
-    original_commit = repo.get_commit("9e82d17d64a7950c731031a3e8124815")
+    # original_commit = repo.get_commit("9e82d17d64a7950c731031a3e8124815")
+    original_commit = repo.get_branch("allegation")
 
     columns = original_commit.table.columns
     if not COMPLAINT_COLS.issubset(set(columns)):
@@ -41,7 +42,7 @@ def __retrieve_complaint_frm_wrgl_data(branch=None):
     #         pbar.update(1000)
 
     # df = pd.DataFrame(added_rows)
-    all_rows = list(repo.get_blocks("9e82d17d64a7950c731031a3e8124815"))
+    all_rows = list(repo.get_blocks("heads/allegation"))
     df = pd.DataFrame(all_rows)
     df.columns = df.iloc[0]
     df = df.iloc[1:].reset_index(drop=True)

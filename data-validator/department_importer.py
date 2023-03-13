@@ -12,7 +12,7 @@ def __retrieve_wrgl_data(branch=None):
 
     # new_commit = repo.get_branch("agency-reference-list")
 
-    original_commit = repo.get_commit("f1da4673f07cd7c093b9185b09399537")
+    original_commit = repo.get_commit("agency-reference-list")
 
     columns = original_commit.table.columns
     if not AGENCY_COLS.issubset(set(columns)):
@@ -37,7 +37,7 @@ def __retrieve_wrgl_data(branch=None):
     #         pbar.update(1000)
 
     # df = pd.DataFrame(added_rows)
-    all_rows = list(repo.get_blocks("f1da4673f07cd7c093b9185b09399537"))
+    all_rows = list(repo.get_blocks("heads/agency-reference-list"))
     df = pd.DataFrame(all_rows)
     df.columns = df.iloc[0]
     df = df.iloc[1:].reset_index(drop=True)
