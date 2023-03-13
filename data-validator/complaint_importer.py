@@ -70,7 +70,7 @@ def __build_complaints_officers_rel(conn):
 
     print('Check officer id after merged')
     null_data = result[result['officer_id'].isnull()]
-    print(null_data)
+    print(null_data[['allegation_uid', 'uid']])
     if len(null_data) > 0:
         client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
         null_data.to_csv('null_officer_of_complaint.csv', index=False)
