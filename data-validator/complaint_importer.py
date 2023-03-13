@@ -92,8 +92,8 @@ def import_complaint(conn):
     cursor.copy_expert(
         sql="""
             COPY complaints_complaint(
-                'uid', 'tracking_id', 'allegation_uid', 'allegation',
-                'disposition', 'action', 'agency', 'allegation_desc'
+                uid, tracking_id, allegation_uid, allegation,
+                disposition, action, agency, allegation_desc
             ) FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
