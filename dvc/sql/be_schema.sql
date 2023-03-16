@@ -174,8 +174,8 @@ ALTER SEQUENCE public.app_config_frontpageorder_id_seq OWNED BY public.app_confi
 
 CREATE TABLE public.appeals_appeal (
     id integer NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     appeal_uid character varying(255) NOT NULL,
     charging_supervisor character varying(255),
     appeal_disposition character varying(255),

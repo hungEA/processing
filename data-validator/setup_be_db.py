@@ -4,6 +4,7 @@ import psycopg2
 from department_importer import import_department
 from officer_importer import import_officer
 from complaint_importer import import_complaint
+from appeal_importer import import_appeal
 
 #establishing the connection
 print("Connecting to postgres...")
@@ -47,6 +48,7 @@ conn = psycopg2.connect(
 import_department(conn)
 import_officer(conn)
 import_complaint(conn)
+import_appeal(conn)
 
 
 #Closing the connection

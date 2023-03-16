@@ -124,7 +124,7 @@ def __build_complaints_relationship(conn):
         # # Temporarily disabled to pass the check in order to continue developing
         # client.files_upload(
         #     channels=os.environ.get('SLACK_CHANNEL'),
-        #     title="Null officers of complaints",
+        #     title="Null agency of complaints",
         #     file="./null_agency_of_complaints.csv",
         #     initial_comment="The following file provides a list of agency that cannot map to complaint:",
         raise Exception('Cannot map agency to complaint')
