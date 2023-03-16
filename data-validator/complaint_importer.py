@@ -52,28 +52,28 @@ def __retrieve_complaint_frm_wrgl_data():
     df.to_csv('complaint.csv', index=False)
 
 
-def __build_complaints_officers_rel(conn):
-
+# def __build_complaints_officers_rel(conn):
+def __build_complaints_relationship(conn):
+    print('Building complaints_officers relationship')
     complaints_df = pd.read_sql(
-        'SELECT id, allegation_uid, uid FROM complaints_complaint',
+        'SELECT id, allegation_uid, uid, agency FROM complaints_complaint',
         con=conn
     )
-    complaints_df.columns = ['complaint_id', 'allegation_uid', 'uid']
+    complaints_df.columns = ['complaint_id', 'allegation_uid', 'uid', 'complaint_agency']
 
     officers_df = pd.read_sql(
-        'SELECT id, uid FROM officers_officer',
+        'SELECT id, uid, agency FROM officers_officer',
         con=conn
     )
-    officers_df.columns = ['officer_id', 'uid']
+    officers_df.columns = ['officer_id', 'uid', 'officer_agency_slug']
 
-    result = pd.merge(complaints_df, officers_df, how='left', on='uid')
+    cor_df = pd.merge(complaints_df, officers_df, how='left', on='uid')
 
     print('Check officer id after merged')
-    null_data = result[result['officer_id'].isnull()]
-    print(null_data[['allegation_uid', 'uid']])
-    if len(null_data) > 0:
+    null_officers_data = cor_df[cor_df['officer_id'].isnull()]
+    if len(null_officers_data) > 0:
         client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
-        null_data.to_csv('null_officers_of_complaints.csv', index=False)
+        null_officers_data.to_csv('null_officers_of_complaints.csv', index=False)
 
         # Temporarily disabled to pass the check in order to continue developing
         # client.files_upload(
@@ -86,10 +86,93 @@ def __build_complaints_officers_rel(conn):
         # raise Exception('Cannot map officer to complaint')
 
     # Temporarily drop NA to continue, otherwise, comment out this statement
-    result.dropna(subset=['officer_id'], inplace=True)
+    final_cor_df = cor_df.dropna(subset=['officer_id'])
 
-    result = result.loc[:, ["complaint_id", "officer_id"]]
-    result.to_csv('complaints_officers_rel.csv', index=False)
+    final_cor_df = final_cor_df.loc[:, ["complaint_id", "officer_id"]]
+    final_cor_df.to_csv('complaints_officers_rel.csv', index=False)
+
+    print('Building complaints_departments relationship')
+    cod_df = cor_df.copy()
+    cod_df['agency_slug'] = cod_df.apply(
+        lambda x: x['officer_agency_slug'] if pd.isnull(x['complaint_agency']) \
+                    else x['complaint_agency'],
+        axis=1
+    )
+
+    null_agency_data = cod_df[cod_df['agency_slug'].isnull()]
+    if len(null_agency_data) > 0:
+        raise Exception('Cannot find agency for complaint')
+
+    diff_agency_data = cod_df[cod_df['officer_agency_slug'] != cod_df['agency_slug']]
+    if len(diff_agency_data) > 0:
+        raise Exception('There are discrepancy')
+
+    agency_df = pd.read_sql(
+        'SELECT id, agency_slug FROM departments_department',
+        con=conn
+    )
+    agency_df.columns = ['department_id', 'agency_slug']
+
+    cdr_df = pd.merge(cod_df, agency_df, how='left', on='agency_slug')
+
+    print('Check agency id after merged')
+    null_department_data = cdr_df[cdr_df['department_id'].isnull()]
+    if len(null_department_data) > 0:
+        # client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
+        # null_data.to_csv('null_agency_of_complaints.csv', index=False)
+
+        # # Temporarily disabled to pass the check in order to continue developing
+        # client.files_upload(
+        #     channels=os.environ.get('SLACK_CHANNEL'),
+        #     title="Null officers of complaints",
+        #     file="./null_agency_of_complaints.csv",
+        #     initial_comment="The following file provides a list of agency that cannot map to complaint:",
+        raise Exception('Cannot map agency to complaint')
+
+    # Temporarily drop NA to continue, otherwise, comment out this statement
+    final_cdr_df = cdr_df.dropna(subset=['department_id'])
+
+    final_cdr_df = final_cdr_df.loc[:, ["complaint_id", "department_id"]]
+    final_cdr_df.to_csv('complaints_departments_rel.csv', index=False)
+
+
+# def __build_complaints_departments_rel(conn):
+#     complaints_df = pd.read_sql(
+#         'SELECT id, allegation_uid, agency FROM complaints_complaint',
+#         con=conn
+#     )
+#     complaints_df.columns = ['complaint_id', 'allegation_uid', 'agency_slug']
+
+#     agency_df = pd.read_sql(
+#         'SELECT id, agency_slug FROM departments_department',
+#         con=conn
+#     )
+#     agency_df.columns = ['department_id', 'agency_slug']
+
+    # result = pd.merge(complaints_df, agency_df, how='left', on='agency_slug')
+
+    # print('Check department id after merged')
+    # null_data = result[result['department_id'].isnull()]
+    # print(null_data[['allegation_uid', 'agency_slug']])
+    # if len(null_data) > 0:
+    #     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
+    #     null_data.to_csv('null_agency_of_complaints.csv', index=False)
+
+    #     # Temporarily disabled to pass the check in order to continue developing
+    #     client.files_upload(
+    #         channels=os.environ.get('SLACK_CHANNEL'),
+    #         title="Null officers of complaints",
+    #         file="./null_agency_of_complaints.csv",
+    #         initial_comment="The following file provides a list of agency that cannot map to complaint:",
+    #     )
+
+    #     raise Exception('Cannot map department to complaint')
+
+    # Temporarily drop NA to continue, otherwise, comment out this statement
+    # result.dropna(subset=['agency_slug'], inplace=True)
+
+    # result = result.loc[:, ["complaint_id", "agency_slug"]]
+    # result.to_csv('complaints_departments_rel.csv', index=False)
 
 
 def import_complaint(conn):
@@ -125,8 +208,10 @@ def import_complaint(conn):
     conn.commit()
     cursor.close()
 
-    __build_complaints_officers_rel(conn)
+    __build_complaints_relationship(conn)
+    # __build_complaints_officers_rel(conn)
 
+    print('Importing complaints and officers relationship')
     cursor = conn.cursor()
     cursor.copy_expert(
         sql="""
@@ -140,6 +225,28 @@ def import_complaint(conn):
     conn.commit()
     cursor.close()
 
-    cursor = conn.cursor()
-    count = cursor.execute('SELECT COUNT(*) FROM complaints_complaint_officers')
+    count = pd.read_sql(
+        'SELECT COUNT(*) FROM complaints_complaint_officers',
+        con=conn
+    )
     print('Number of records in complaints_officers rel', count.iloc[0])
+
+    print('Importing complaints and agency relationship')
+    cursor = conn.cursor()
+    cursor.copy_expert(
+        sql="""
+            COPY complaints_complaint_departments(
+                complaint_id, department_id
+            ) FROM stdin WITH CSV HEADER
+            DELIMITER as ','
+        """,
+        file=open('complaints_departments_rel.csv', 'r'),
+    )
+    conn.commit()
+    cursor.close()
+
+    count = pd.read_sql(
+        'SELECT COUNT(*) FROM complaints_complaint_departments',
+        con=conn
+    )
+    print('Number of records in complaints_departments rel', count.iloc[0])

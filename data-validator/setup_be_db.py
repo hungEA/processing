@@ -8,7 +8,11 @@ from complaint_importer import import_complaint
 #establishing the connection
 print("Connecting to postgres...")
 conn = psycopg2.connect(
-   database="postgres", user='postgres', password='postgres', host='localhost', port= '5432'
+   database=os.environ.get('POSTGRES_DB', 'postgres'),
+   user=os.environ.get('POSTGRES_USER', 'postgres'),
+   password=os.environ.get('POSTGRES_PASSWORD'),
+   host=os.environ.get('POSTGRES_HOST', 'localhost'),
+   port=os.environ.get('POSTGRES_PORT', '5432')
 )
 #Creating a cursor object using the cursor() method
 cursor = conn.cursor()
@@ -25,7 +29,7 @@ cursor.close()
 print(os.listdir('.'))
 
 cursor = conn.cursor()
-cursor.execute("CREATE USER ipno WITH PASSWORD 'postgres'")
+cursor.execute("CREATE USER ipno WITH PASSWORD 'ipno-P4ssWd'")
 cursor.execute(open("dvc/sql/be_schema.sql", "r").read())
 
 conn.commit()
@@ -33,7 +37,11 @@ cursor.close()
 conn.close()
 
 conn = psycopg2.connect(
-   database="postgres", user='ipno', password='postgres', host='localhost', port= '5432'
+   database=os.environ.get('POSTGRES_DB', 'postgres'),
+   user='ipno',
+   password='ipno-P4ssWd',
+   host=os.environ.get('POSTGRES_HOST', 'localhost'),
+   port=os.environ.get('POSTGRES_PORT', '5432')
 )
 
 import_department(conn)
