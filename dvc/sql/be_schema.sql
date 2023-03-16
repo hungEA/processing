@@ -2223,8 +2223,8 @@ ALTER SEQUENCE public.token_blacklist_outstandingtoken_id_seq OWNED BY public.to
 
 CREATE TABLE public.use_of_forces_useofforce (
     id integer NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     uof_uid character varying(255) NOT NULL,
     service_type character varying(255),
     disposition character varying(255),

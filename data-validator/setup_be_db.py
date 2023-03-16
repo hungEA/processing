@@ -5,6 +5,7 @@ from department_importer import import_department
 from officer_importer import import_officer
 from complaint_importer import import_complaint
 from appeal_importer import import_appeal
+from uof_importer import import_uof
 
 #establishing the connection
 print("Connecting to postgres...")
@@ -49,6 +50,7 @@ import_department(conn)
 import_officer(conn)
 import_complaint(conn)
 import_appeal(conn)
+import_uof(conn)
 
 
 #Closing the connection

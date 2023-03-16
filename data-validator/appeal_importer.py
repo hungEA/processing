@@ -20,7 +20,7 @@ def __retrieve_appeal_frm_wrgl_data(branch=None):
 
     columns = original_commit.table.columns
     if not set(APPEAL_COLS).issubset(set(columns)):
-        raise Exception('BE officer columns are not recognized in the current commit')
+        raise Exception('BE appeal columns are not recognized in the current commit')
 
     # result = repo.diff(original_commit, None)
     # result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')

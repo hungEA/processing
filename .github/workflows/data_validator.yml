@@ -1,12 +1,12 @@
 ---
-name: "check-runner"
+name: "data-validator"
 
 on:
   push
 
 jobs:
-  check-runner:
-    name: "Check Runner"
+  data-validator:
+    name: "Data Validator"
     runs-on: "self-hosted"
     environment: DATA-VALIDATOR
 
