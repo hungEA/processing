@@ -31,7 +31,7 @@ def __retrieve_uof_frm_wrgl_data(branch=None):
 
 
 def __build_uof_rel(conn):
-    print('Check integrity between officers\' agency and appeal agency')
+    print('Check integrity between officers\' agency and uof agency')
     uof_df = pd.read_csv('uof.csv')
 
     officers_df = pd.read_sql(
@@ -81,7 +81,7 @@ def __build_uof_rel(conn):
     null_department_data = result[result['department_id'].isnull()]
     if len(null_department_data) > 0:
         # client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
-        # null_data.to_csv('null_agency_of_complaints.csv', index=False)
+        # null_data.to_csv('null_agency_of_uof.csv', index=False)
 
         # # Temporarily disabled to pass the check in order to continue developing
         # client.files_upload(

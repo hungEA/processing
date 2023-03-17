@@ -378,8 +378,8 @@ ALTER TABLE public.authtoken_token OWNER TO ipno;
 
 CREATE TABLE public.citizens_citizen (
     id integer NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     citizen_uid character varying(255) NOT NULL,
     allegation_uid character varying(255),
     uof_uid character varying(255),
