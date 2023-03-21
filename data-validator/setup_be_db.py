@@ -9,13 +9,8 @@ from appeal_importer import import_appeal
 from uof_importer import import_uof
 from citizen_importer import import_citizen
 from document_importer import import_document
+from event_importer import import_event
 
-
-print(os.environ.get('POSTGRES_DB'))
-print(os.environ.get('POSTGRES_USER'))
-print(os.environ.get('POSTGRES_PASSWORD'))
-print(os.environ.get('POSTGRES_HOST', 'localhost'))
-print(os.environ.get('POSTGRES_PORT', '5432'))
 
 #establishing the connection
 print("Connecting to postgres...")
@@ -30,7 +25,7 @@ conn = psycopg2.connect(
 cursor = conn.cursor()
 
 #Executing an MYSQL function using the execute() method
-cursor.execute("select version()")
+cursor.execute("SELECT version()")
 
 # Fetch a single row using fetchone() method.
 data = cursor.fetchone()
@@ -38,16 +33,12 @@ print("Connection established to: ", data)
 
 cursor.close()
 
-# print(os.listdir('.'))
-
 cursor = conn.cursor()
-print('Building db schema')
-# cursor.execute("CREATE USER ipno WITH PASSWORD 'ipno-P4ssWd'")
+print('Building schema of BE Database')
 cursor.execute(open("dvc/sql/be_schema.sql", "r").read())
 
 conn.commit()
 cursor.close()
-# conn.close()
 
 # schema = pd.read_sql('''
 #    SELECT table_name FROM information_schema.tables
@@ -56,23 +47,22 @@ cursor.close()
 # )
 # print(schema)
 
-
-
-# conn = psycopg2.connect(
-#    database=os.environ.get('POSTGRES_DB', 'postgres'),
-#    user='ipno',
-#    password='ipno-P4ssWd',
-#    host=os.environ.get('POSTGRES_HOST', 'localhost'),
-#    port=os.environ.get('POSTGRES_PORT', '5432')
-# )
-
+print('======== Importing department ========')
 import_department(conn)
+print('======== Importing officer ========')
 import_officer(conn)
+print('======== Importing complaint ========')
 import_complaint(conn)
+print('======== Importing appeal ========')
 import_appeal(conn)
+print('======== Importing use of force ========')
 import_uof(conn)
+print('======== Importing citizen ========')
 import_citizen(conn)
+print('======== Importing document ========')
 import_document(conn)
+print('======== Importing event ========')
+import_event(conn)
 
 
 #Closing the connection

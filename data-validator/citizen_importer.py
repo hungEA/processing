@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-# from tqdm import tqdm
 from wrgl import Repository
 from slack_sdk import WebClient
 
@@ -14,8 +13,6 @@ CITIZEN_COLS = [
 
 def __retrieve_citizen_frm_wrgl_data(branch=None):
     repo = Repository("https://wrgl.llead.co/", None)
-
-    # new_commit = repo.get_branch("agency-reference-list")
 
     original_commit = repo.get_branch("citizens")
 
@@ -75,14 +72,14 @@ def __build_citizen_rel(conn):
 
     result = pd.merge(result, uof_df, how='left', on='uof_uid')
 
-    final_result = result.loc[:, CITIZEN_COLS + ['department_id', 'complaint_id', 'uof_id']]
-    final_result = final_result.astype({
+    result = result.loc[:, CITIZEN_COLS + ['department_id', 'complaint_id', 'uof_id']]
+    result = result.astype({
         'department_id': int,
         'complaint_id': pd.Int64Dtype(),
         'uof_id': pd.Int64Dtype(),
         'citizen_age': pd.Int64Dtype()
     })
-    final_result.to_csv('citizens.csv', index=False)
+    result.to_csv('citizens.csv', index=False)
 
 
 def import_citizen(conn):

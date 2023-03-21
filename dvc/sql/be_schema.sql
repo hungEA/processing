@@ -1846,8 +1846,8 @@ ALTER SEQUENCE public.news_articles_newsarticlesource_id_seq OWNED BY public.new
 
 CREATE TABLE public.officers_event (
     id integer NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     event_uid character varying(255) NOT NULL,
     kind character varying(255),
     year integer,

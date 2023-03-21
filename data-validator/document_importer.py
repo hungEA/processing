@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import pandas as pd
-# from tqdm import tqdm
 from wrgl import Repository
 from slack_sdk import WebClient
 
@@ -52,8 +51,6 @@ def __build_document_rel(conn):
     no_officers_in_documents = documents_df['uid'].dropna().unique()
     print('Number of officers in WRGL documents', len(no_officers_in_documents))
 
-    dor_df.dropna(subset=['officer_id'], inplace=True)
-
     diff_officers = set(no_officers_in_documents) - set(officers_df['uid'])
     print('Number of differences in officers', len(diff_officers))
 
@@ -70,6 +67,8 @@ def __build_document_rel(conn):
         #     initial_comment="The following file provides a list of matched_uid in documents that cannot map to officers:",
         # )
         # raise Exception('There is anomaly in the number of officers in documents')
+
+    dor_df.dropna(subset=['officer_id'], inplace=True)
 
     dor_df = dor_df.loc[:, ['document_id', 'officer_id']]
     dor_df = dor_df.astype({
@@ -93,8 +92,6 @@ def __build_document_rel(conn):
     diff_agency = set(no_agency_in_documents) - set(agency_df['agency_slug'])
     print('Number of differences in agency', len(diff_agency))
 
-    ddr_df.dropna(subset=['department_id'], inplace=True)
-
     if len(diff_agency) > 0:
         with open('no_agency_in_documents.csv', 'w') as fwriter:
             fwriter.write('\n'.join(list(diff_agency)))
@@ -107,6 +104,8 @@ def __build_document_rel(conn):
             initial_comment="The following file provides a list of agency in documents that cannot map to department:",
         )
         raise Exception('There is anomaly in the number of agency in documents')
+
+    ddr_df.dropna(subset=['department_id'], inplace=True)
 
     ddr_df = ddr_df.loc[:, ['document_id', 'department_id']]
     ddr_df = ddr_df.astype({

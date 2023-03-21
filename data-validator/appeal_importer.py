@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-# from tqdm import tqdm
 from wrgl import Repository
 from slack_sdk import WebClient
 
@@ -14,33 +13,12 @@ APPEAL_COLS = [
 def __retrieve_appeal_frm_wrgl_data(branch=None):
     repo = Repository("https://wrgl.llead.co/", None)
 
-    # new_commit = repo.get_branch("agency-reference-list")
-
     original_commit = repo.get_branch("appeal-hearing")
 
     columns = original_commit.table.columns
     if not set(APPEAL_COLS).issubset(set(columns)):
         raise Exception('BE appeal columns are not recognized in the current commit')
 
-    # result = repo.diff(original_commit, None)
-    # result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')
-
-    # added_rows = []
-    # with tqdm(
-    #     total=len(result), desc="Downloading created data"
-    # ) as pbar:
-    #     for i in range(0, len(result), 1000):
-    #         added_rows.extend(
-    #             list(
-    #                 repo.get_table_rows(
-    #                     original_commit.table.sum,
-    #                     result[i : i + 1000],
-    #                 )
-    #             )
-    #         )
-    #         pbar.update(1000)
-
-    # df = pd.DataFrame(added_rows)
     all_rows = list(repo.get_blocks("heads/appeal-hearing"))
     df = pd.DataFrame(all_rows)
     df.columns = df.iloc[0]

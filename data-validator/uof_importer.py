@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-# from tqdm import tqdm
 from wrgl import Repository
 from slack_sdk import WebClient
 
@@ -13,8 +12,6 @@ UOF_COLS = [
 
 def __retrieve_uof_frm_wrgl_data(branch=None):
     repo = Repository("https://wrgl.llead.co/", None)
-
-    # new_commit = repo.get_branch("agency-reference-list")
 
     original_commit = repo.get_branch("use-of-force")
 

@@ -1,7 +1,6 @@
 import os
 import sys
 import pandas as pd
-# from tqdm import tqdm
 from wrgl import Repository
 from slack_sdk import WebClient
 
@@ -15,34 +14,12 @@ COMPLAINT_COLS = [
 def __retrieve_complaint_frm_wrgl_data():
     repo = Repository("https://wrgl.llead.co/", None)
 
-    # new_commit = repo.get_branch("agency-reference-list")
-
-    # original_commit = repo.get_commit("9e82d17d64a7950c731031a3e8124815")
     original_commit = repo.get_branch("allegation")
 
     columns = original_commit.table.columns
     if not set(COMPLAINT_COLS).issubset(set(columns)):
         raise Exception('BE complaint columns are not recognized in the current commit')
 
-    # result = repo.diff(original_commit, None)
-    # result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')
-
-    # added_rows = []
-    # with tqdm(
-    #     total=len(result), desc="Downloading created data"
-    # ) as pbar:
-    #     for i in range(0, len(result), 1000):
-    #         added_rows.extend(
-    #             list(
-    #                 repo.get_table_rows(
-    #                     original_commit.table.sum,
-    #                     result[i : i + 1000],
-    #                 )
-    #             )
-    #         )
-    #         pbar.update(1000)
-
-    # df = pd.DataFrame(added_rows)
     all_rows = list(repo.get_blocks("heads/allegation"))
     df = pd.DataFrame(all_rows)
     df.columns = df.iloc[0]
@@ -52,7 +29,6 @@ def __retrieve_complaint_frm_wrgl_data():
     df.to_csv('complaint.csv', index=False)
 
 
-# def __build_complaints_officers_rel(conn):
 def __build_complaints_relationship(conn):
     print('Building complaints_officers relationship')
     complaints_df = pd.read_sql(
@@ -130,49 +106,10 @@ def __build_complaints_relationship(conn):
         raise Exception('Cannot map agency to complaint')
 
     # Temporarily drop NA to continue, otherwise, comment out this statement
-    final_cdr_df = cdr_df.dropna(subset=['department_id'])
+    cdr_df.dropna(subset=['department_id'], inplace=True)
 
-    final_cdr_df = final_cdr_df.loc[:, ["complaint_id", "department_id"]]
-    final_cdr_df.to_csv('complaints_departments_rel.csv', index=False)
-
-
-# def __build_complaints_departments_rel(conn):
-#     complaints_df = pd.read_sql(
-#         'SELECT id, allegation_uid, agency FROM complaints_complaint',
-#         con=conn
-#     )
-#     complaints_df.columns = ['complaint_id', 'allegation_uid', 'agency_slug']
-
-#     agency_df = pd.read_sql(
-#         'SELECT id, agency_slug FROM departments_department',
-#         con=conn
-#     )
-#     agency_df.columns = ['department_id', 'agency_slug']
-
-    # result = pd.merge(complaints_df, agency_df, how='left', on='agency_slug')
-
-    # print('Check department id after merged')
-    # null_data = result[result['department_id'].isnull()]
-    # print(null_data[['allegation_uid', 'agency_slug']])
-    # if len(null_data) > 0:
-    #     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
-    #     null_data.to_csv('null_agency_of_complaints.csv', index=False)
-
-    #     # Temporarily disabled to pass the check in order to continue developing
-    #     client.files_upload(
-    #         channels=os.environ.get('SLACK_CHANNEL'),
-    #         title="Null officers of complaints",
-    #         file="./null_agency_of_complaints.csv",
-    #         initial_comment="The following file provides a list of agency that cannot map to complaint:",
-    #     )
-
-    #     raise Exception('Cannot map department to complaint')
-
-    # Temporarily drop NA to continue, otherwise, comment out this statement
-    # result.dropna(subset=['agency_slug'], inplace=True)
-
-    # result = result.loc[:, ["complaint_id", "agency_slug"]]
-    # result.to_csv('complaints_departments_rel.csv', index=False)
+    cdr_df = cdr_df.loc[:, ["complaint_id", "department_id"]]
+    cdr_df.to_csv('complaints_departments_rel.csv', index=False)
 
 
 def import_complaint(conn):
@@ -209,7 +146,6 @@ def import_complaint(conn):
     cursor.close()
 
     __build_complaints_relationship(conn)
-    # __build_complaints_officers_rel(conn)
 
     print('Importing complaints and officers relationship')
     cursor = conn.cursor()

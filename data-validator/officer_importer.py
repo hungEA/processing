@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-# from tqdm import tqdm
 from wrgl import Repository
 from slack_sdk import WebClient
 
@@ -14,33 +13,12 @@ OFFICER_COLS = [
 def __retrieve_officer_frm_wrgl_data(branch=None):
     repo = Repository("https://wrgl.llead.co/", None)
 
-    # new_commit = repo.get_branch("agency-reference-list")
-
     original_commit = repo.get_branch("personnel")
 
     columns = original_commit.table.columns
     if not set(OFFICER_COLS).issubset(set(columns)):
         raise Exception('BE officer columns are not recognized in the current commit')
 
-    # result = repo.diff(original_commit, None)
-    # result = repo.get_blocks('a6ef318b18113d2661ff966fdf4972f0')
-
-    # added_rows = []
-    # with tqdm(
-    #     total=len(result), desc="Downloading created data"
-    # ) as pbar:
-    #     for i in range(0, len(result), 1000):
-    #         added_rows.extend(
-    #             list(
-    #                 repo.get_table_rows(
-    #                     original_commit.table.sum,
-    #                     result[i : i + 1000],
-    #                 )
-    #             )
-    #         )
-    #         pbar.update(1000)
-
-    # df = pd.DataFrame(added_rows)
     all_rows = list(repo.get_blocks("heads/personnel"))
     df = pd.DataFrame(all_rows)
     df.columns = df.iloc[0]
@@ -83,26 +61,14 @@ def __preprocess_officer(agency_df):
 
 
 def import_officer(conn):
-    # cursor = conn.cursor()
-    # cursor.execute("""SELECT table_name FROM information_schema.tables
-    #    WHERE table_schema = 'public'""")
-    # for table in cursor.fetchall():
-    #     print(table)
-
-    # cursor.close()
-
     __retrieve_officer_frm_wrgl_data()
 
 
     agency_df = pd.read_sql('SELECT id, agency_slug FROM departments_department', conn)
     agency_df.columns = ['department_id', 'agency']
-    # print('Check agency id')
-    # print(agency_df[agency_df['agency'].isnull()])
 
     __preprocess_officer(agency_df)
 
-    # data = pd.read_csv('agency.csv')
-    # data.to_sql('departments_department', con=conn, if_exists='replace', index=False)
     cursor = conn.cursor()
     cursor.copy_expert(
         sql="""
