@@ -68,7 +68,7 @@ def read_constraints():
 
 
 def read_post():
-    post = pd.read_csv(deba.data("clean/post_officer_history.csv"))
+    post = pd.read_csv(deba.data("match/post_officer_history.csv"))
     post = post.drop_duplicates(subset=["uid"])
     print("read post officer history file (%d rows)" % post.shape[0])
     return post
@@ -174,6 +174,22 @@ def cross_match_officers_between_agencies(personnel, events, constraints, post):
     return clusters, per[["max_timestamp", "agency"]]
 
 
+def split_rows_with_multiple_uids(df):
+    df = (
+        df.drop("uid", axis=1)
+        .join(
+            df["uid"]
+            .str.split(",", expand=True)
+            .stack()
+            .reset_index(level=1, drop=True)
+            .rename("uid"),
+            how="outer",
+        )
+        .reset_index(drop=True)
+    )
+    return df
+
+
 def create_person_table(clusters, personnel, personnel_event):
     # add back unmatched officers into clusters list
     matched_uids = frozenset().union(*[s for s in clusters])
@@ -208,8 +224,11 @@ def create_person_table(clusters, personnel, personnel_event):
 
     # join uids with comma
     person_df.loc[:, "uids"] = person_df.uids.str.join(",")
-
-    return person_df[["person_id", "canonical_uid", "uids"]]
+    
+    person_df = person_df.rename(columns={"uids": "uid"})
+    person_df = person_df.pipe(split_rows_with_multiple_uids)
+    person_df = person_df.drop_duplicates(subset=["canonical_uid", "uid"], keep="first").reset_index()
+    return person_df[["person_id", "canonical_uid", "uid"]]
 
 
 def entity_resolution(
@@ -282,22 +301,22 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # old_person_df = pd.read_csv(args.person_csv)
-    # if args.new_person_csv is not None:
-    #     new_person_df = pd.read_csv(args.new_person_csv)
-    #     person_df = entity_resolution(
-    #         old_person=old_person_df, new_person=new_person_df
-    #     )
-    #     person_df.to_csv(deba.data("fuse/person.csv"), index=False)
-    # else:
-    #     personnel = pd.read_csv(deba.data("fuse/personnel.csv"))
-    #     print("read personnel file (%d x %d)" % personnel.shape)
-    #     events = pd.read_csv(deba.data("fuse/event.csv"))
-    #     print("read events file (%d x %d)" % events.shape)
-    #     constraints = read_constraints()
-    #     post = read_post()
-    #     clusters, personnel_event = cross_match_officers_between_agencies(
-    #         personnel, events, constraints, post
-    #     )
-    #     new_person_df = create_person_table(clusters, personnel, personnel_event)
-    #     new_person_df.to_csv(deba.data("fuse/person.csv"), index=False)
+    old_person_df = pd.read_csv(args.person_csv)
+    if args.new_person_csv is not None:
+        new_person_df = pd.read_csv(args.new_person_csv)
+        person_df = entity_resolution(
+            old_person=old_person_df, new_person=new_person_df
+        )
+        person_df.to_csv(deba.data("fuse/person.csv"), index=False)
+    else:
+        personnel = pd.read_csv(deba.data("fuse/personnel.csv"))
+        print("read personnel file (%d x %d)" % personnel.shape)
+        events = pd.read_csv(deba.data("fuse/event.csv"))
+        print("read events file (%d x %d)" % events.shape)
+        constraints = read_constraints()
+        post = read_post()
+        clusters, personnel_event = cross_match_officers_between_agencies(
+            personnel, events, constraints, post
+        )
+        new_person_df = create_person_table(clusters, personnel, personnel_event)
+        new_person_df.to_csv(deba.data("fuse/person.csv"), index=False)
