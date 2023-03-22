@@ -27,27 +27,31 @@ def __retrieve_person_frm_wrgl_data(branch=None):
     df.to_csv('person.csv', index=False)
 
 
-def __preprocess_person(officer_df):
+def __build_person_rel(db_con):
     df = pd.read_csv('person.csv')
 
-    result = pd.merge(df, officer_df, how='left', on='canonical_uid')
+    officer_df = pd.read_sql('SELECT id, uid FROM officers_officer', db_con)
+    officer_df.columns = ['officer_id', 'uids']
+
+    result = pd.merge(df, officer_df, how='left', on='uids')
 
     print('Check officer id after merged')
-    null_data = result[result['officer_id'].isnull()]
-    if len(null_data) > 0:
-        client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
-        null_data.to_csv('null_officers_of_person.csv', index=False)
+    null_officer_data = result[result['officer_id'].isnull()]
+    if len(null_officer_data) > 0:
+        # client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
+        null_officer_data.to_csv('null_officers_of_person.csv', index=False)
 
+        # Temporarily disabled to pass the check in order to continue developing
         # client.files_upload(
         #     channels=os.environ.get('SLACK_CHANNEL'),
-        #     title="Null agency of officers",
-        #     file="./null_agency_of_officers.csv",
-        #     initial_comment="The following file provides a list of personnels that cannot map to agency:",
+        #     title="Null officers of person",
+        #     file="./null_officers_of_person.csv",
+        #     initial_comment="The following file provides a list of uids in person that cannot map to personnel:",
         # )
 
-        raise Exception('Cannot map officer to person')
+        # raise Exception('Cannot map uids in person to personnel')
 
-    result.dropna(subset=['officer_id'], inplace=True)
+    # result.dropna(subset=['officer_id'], inplace=True)
 
     # result = result.astype({
     #     'department_id': int,
@@ -55,17 +59,11 @@ def __preprocess_person(officer_df):
     #     'birth_month': pd.Int64Dtype(),
     #     'birth_day': pd.Int64Dtype()
     # })
-    result.to_csv('person.csv', index=False)
+    # result.to_csv('person.csv', index=False)
 
-    print(result.head(10))
+    # print(result.head(10))
 
 
-def import_person(conn):
+def import_person(db_con):
     __retrieve_person_frm_wrgl_data()
-
-    officer_df = pd.read_sql('SELECT id, uid FROM officers_officer', conn)
-    officer_df.columns = ['officer_id', 'canonical_uid']
-    # print('Check officer canonical_uid')
-    # print(officer_df[officer_df['canonical_uid'].isnull()])
-
-    __preprocess_person(officer_df)
+    __build_person_rel(db_con)

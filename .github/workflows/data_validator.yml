@@ -34,6 +34,30 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install slack package
         run: pip install slack_sdk==3.19.5
+      - name: dvc pull
+        shell: "bash --noprofile --norc -x -eo pipefail {0}"
+        run: |
+          find dvc/data/raw -type f | xargs -I{} sed -iE 's/wdir\: ..\/..\/..\/data\/raw/wdir\: \/runner\/_work\/data\/data\/raw/g' {}
+          mkdir /runner/_work/data/dvc_cache || true
+          dvc cache dir --local /runner/_work/data/dvc_cache
+          dvc pull -v -f
+      - name: wrgl pull
+        run: |
+          wrgl config set --global user.email "gh-action@publicdata.works"
+          wrgl config set --global user.name "Github Action"
+          mkdir /runner/_work/data/.wrgl || true
+          cp .wrgl/config.yaml /runner/_work/data/.wrgl/
+          wrgl init --wrgl-dir /runner/_work/data/.wrgl || true
+          wrgl pull --wrgl-dir /runner/_work/data/.wrgl --all --ignore-non-existent --no-progress
+      - name: process data
+        run: |
+          sed -iE 's/dataDir\: data/dataDir\: \/runner\/_work\/data\/data/g' deba.yaml
+          echo "md5Dir: /runner/_work/data/md5" >> deba.yaml
+          make WRGL_FLAGS="--wrgl-dir /runner/_work/data/.wrgl" GSUTIL="$(which gsutil)"
+        env:
+          OCR_ENSURE_COMPLETE: "true"
+      - name: list the processed csv
+        run: ls /runner/_work/data
       - name: Connect sqlite
         run: python scripts/create_sqlite.py
       - name: Connect postgres db

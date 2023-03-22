@@ -10,6 +10,7 @@ from uof_importer import import_uof
 from citizen_importer import import_citizen
 from document_importer import import_document
 from event_importer import import_event
+from person_importer import import_person
 
 
 #establishing the connection
@@ -63,6 +64,8 @@ print('======== Importing document ========')
 import_document(conn)
 print('======== Importing event ========')
 import_event(conn)
+print('======== Importing person ========')
+import_person(conn)
 
 
 #Closing the connection
