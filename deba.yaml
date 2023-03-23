@@ -8,9 +8,9 @@ patterns:
     - "`*`.to_csv(deba.data(r'.+\\.csv'))"
 stages:
   - name: meta
-  - name: ocr
-    commonPrerequisites:
-      - ocr_results
+  # - name: ocr
+  #   commonPrerequisites:
+  #     - ocr_results
   - name: ner
   - name: clean
     ignoredTargets:
