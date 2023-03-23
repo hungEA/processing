@@ -10,30 +10,30 @@ jobs:
     runs-on: "self-hosted"
     environment: DATA-VALIDATOR
 
-    # Service containers to run with `container-job`
-    services:
-      # Label used to access the service container
-      postgres:
-        # Docker Hub image
-        image: postgres:13.1
-        # Provide the password for postgres
-        env:
-          POSTGRES_USER: ipno
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ipno
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
+    # # Service containers to run with `container-job`
+    # services:
+    #   # Label used to access the service container
+    #   postgres:
+    #     # Docker Hub image
+    #     image: postgres:13.1
+    #     # Provide the password for postgres
+    #     env:
+    #       POSTGRES_USER: ipno
+    #       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+    #       POSTGRES_DB: ipno
+    #     # Set health checks to wait until postgres has started
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+    #     ports:
+    #       - 5432:5432
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Install slack package
-        run: pip install slack_sdk==3.19.5
+      # - uses: actions/checkout@v3
+      # - name: Install slack package
+      #   run: pip install slack_sdk==3.19.5
       - name: dvc pull
         shell: "bash --noprofile --norc -x -eo pipefail {0}"
         run: |
@@ -55,20 +55,20 @@ jobs:
           echo "md5Dir: /runner/_work/data/md5" >> deba.yaml
           make WRGL_FLAGS="--wrgl-dir /runner/_work/data/.wrgl" GSUTIL="$(which gsutil)"
         env:
-          OCR_ENSURE_COMPLETE: "false"
+          OCR_ENSURE_COMPLETE: "true"
       - name: list the processed csv
         run: ls /runner/_work/data
-      - name: Connect sqlite
-        run: python scripts/create_sqlite.py
-      - name: Connect postgres db
-        run: python data-validator/setup_be_db.py
-        env:
-          # The hostname used to communicate with the PostgreSQL service container
-          POSTGRES_HOST: localhost
-          # The default PostgreSQL port
-          POSTGRES_PORT: 5432
-          POSTGRES_DB: ipno
-          POSTGRES_USER: ipno
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+      # - name: Connect sqlite
+      #   run: python scripts/create_sqlite.py
+      # - name: Connect postgres db
+      #   run: python data-validator/setup_be_db.py
+      #   env:
+      #     # The hostname used to communicate with the PostgreSQL service container
+      #     POSTGRES_HOST: localhost
+      #     # The default PostgreSQL port
+      #     POSTGRES_PORT: 5432
+      #     POSTGRES_DB: ipno
+      #     POSTGRES_USER: ipno
+      #     POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      #     SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      #     SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}

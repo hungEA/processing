@@ -17,8 +17,8 @@ files:
     schema: award
   data/fuse/property_claims.csv:
     schema: property_claims
-  # data/fuse/post_officer_history.csv:
-  #   schema: post_officer_history
+  data/fuse/post_officer_history.csv:
+    schema: post_officer_history
   data/fuse/settlements.csv:
     schema: settlement
   data/fuse/docs.csv:
@@ -513,18 +513,18 @@ schemas:
       - name: property_damage_open
       - name: property_damage_incurred
       - name: property_damage_sub
-  # post_officer_history:
-  #   columns:
-  #     - name: history_id
-  #       description: >
-  #         unique identifier of post officer history report
-  #     - name: uid
-  #       description: >
-  #         unique identifier of officer
-  #       unique: true
-  #       no_na: true
-  #     - name: agency
-  #     - name: left_reason
+  post_officer_history:
+    columns:
+      - name: history_id
+        description: >
+          unique identifier of post officer history report
+      - name: uid
+        description: >
+          unique identifier of officer
+        unique: true
+        no_na: true
+      - name: agency
+      - name: left_reason
   settlement:
     columns:
       - name: settlement_uid
