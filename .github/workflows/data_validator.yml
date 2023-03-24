@@ -37,9 +37,12 @@ jobs:
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
-          service_account: 'k8s-ocr-jobqueue@excellent-zoo-300106.iam.gserviceaccount.com'
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+          # service_account: 'k8s-ocr-jobqueue@excellent-zoo-300106.iam.gserviceaccount.com'
       # - name: check gcloud authen path
       #   run: gcloud auth application-default login
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
       - name: check gcloud info
         run: gcloud info
       - name: dvc pull
