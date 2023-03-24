@@ -49,6 +49,8 @@ jobs:
       #   run: gcloud info
       - name: check cloud sdk location
         run: ls -lsrt /usr/local/gcloud/google-cloud-sdk/bin
+      - name: install package for gsutil
+        run: pip install pyopenssl cryptography==38.0.4
       - name: dvc pull
         shell: "bash --noprofile --norc -x -eo pipefail {0}"
         run: |
