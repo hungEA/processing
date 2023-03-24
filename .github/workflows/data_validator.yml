@@ -43,6 +43,7 @@ jobs:
       #   run: gcloud auth application-default login
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
+        with:
           version: '>= 415.0.0'
       # - name: check gcloud info
       #   run: gcloud info
