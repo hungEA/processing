@@ -34,6 +34,8 @@ jobs:
       - uses: actions/checkout@v3
       # - name: Install slack package
       #   run: pip install slack_sdk==3.19.5
+      - name: check gcloud authen path
+        run: ls /var/lib/minikube/ -lsrta
       - name: dvc pull
         shell: "bash --noprofile --norc -x -eo pipefail {0}"
         run: |
@@ -49,13 +51,13 @@ jobs:
       #     cp .wrgl/config.yaml /runner/_work/data/.wrgl/
       #     wrgl init --wrgl-dir /runner/_work/data/.wrgl || true
       #     wrgl pull --wrgl-dir /runner/_work/data/.wrgl --all --ignore-non-existent --no-progress
-      - name: process data
-        run: |
-          sed -iE 's/dataDir\: data/dataDir\: \/runner\/_work\/data\/data/g' deba.yaml
-          echo "md5Dir: /runner/_work/data/md5" >> deba.yaml
-          make WRGL_FLAGS="--wrgl-dir /runner/_work/data/.wrgl" GSUTIL="$(which gsutil)"
-        env:
-          OCR_ENSURE_COMPLETE: "true"
+      # - name: process data
+      #   run: |
+      #     sed -iE 's/dataDir\: data/dataDir\: \/runner\/_work\/data\/data/g' deba.yaml
+      #     echo "md5Dir: /runner/_work/data/md5" >> deba.yaml
+      #     make WRGL_FLAGS="--wrgl-dir /runner/_work/data/.wrgl" GSUTIL="$(which gsutil)"
+      #   env:
+      #     OCR_ENSURE_COMPLETE: "true"
       - name: list the processed csv
         run: ls /runner/_work/data
       # - name: Connect sqlite
