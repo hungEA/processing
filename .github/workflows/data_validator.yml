@@ -65,7 +65,7 @@ jobs:
           mkdir /runner/_work/data/.wrgl || true
           cp .wrgl/config.yaml /runner/_work/data/.wrgl/
           wrgl init --wrgl-dir /runner/_work/data/.wrgl || true
-          wrgl pull --wrgl-dir /runner/_work/data/.wrgl pull person origin +refs/heads/person:refs/remotes/origin/person
+          wrgl pull person origin +refs/heads/person:refs/remotes/origin/person --wrgl-dir /runner/_work/data/.wrgl
           wrgl export --wrgl-dir /runner/_work/data/.wrgl person > /runner/_work/data/consolidate/person.csv
       #    wrgl pull --wrgl-dir /runner/_work/data/.wrgl --all --ignore-non-existent --no-progress
       # - name: process data
