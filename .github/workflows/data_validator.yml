@@ -51,13 +51,13 @@ jobs:
         run: ls -lsrt /usr/local/gcloud/google-cloud-sdk/bin
       - name: install package for gsutil
         run: pip install pyopenssl cryptography==38.0.4
-      - name: dvc pull
-        shell: "bash --noprofile --norc -x -eo pipefail {0}"
-        run: |
-          find dvc/data/raw -type f | xargs -I{} sed -iE 's/wdir\: ..\/..\/..\/data\/raw/wdir\: \/runner\/_work\/data\/data\/raw/g' {}
-          mkdir /runner/_work/data/dvc_cache || true
-          dvc cache dir --local /runner/_work/data/dvc_cache
-          dvc pull -v -f
+      # - name: dvc pull
+      #   shell: "bash --noprofile --norc -x -eo pipefail {0}"
+      #   run: |
+      #     find dvc/data/raw -type f | xargs -I{} sed -iE 's/wdir\: ..\/..\/..\/data\/raw/wdir\: \/runner\/_work\/data\/data\/raw/g' {}
+      #     mkdir /runner/_work/data/dvc_cache || true
+      #     dvc cache dir --local /runner/_work/data/dvc_cache
+      #     dvc pull -v -f
       - name: wrgl pull
         run: |
           wrgl config set --global user.email "gh-action@publicdata.works"
@@ -65,16 +65,18 @@ jobs:
           mkdir /runner/_work/data/.wrgl || true
           cp .wrgl/config.yaml /runner/_work/data/.wrgl/
           wrgl init --wrgl-dir /runner/_work/data/.wrgl || true
-      #     wrgl pull --wrgl-dir /runner/_work/data/.wrgl --all --ignore-non-existent --no-progress
-      - name: process data
-        run: |
-          sed -iE 's/dataDir\: data/dataDir\: \/runner\/_work\/data\/data/g' deba.yaml
-          echo "md5Dir: /runner/_work/data/md5" >> deba.yaml
-          make WRGL_FLAGS="--wrgl-dir /runner/_work/data/.wrgl" GSUTIL="$(which gsutil)"
-        env:
-          OCR_ENSURE_COMPLETE: "true"
+          wrgl pull --wrgl_dir /runner/_work/data/consolidate/ pull person origin +refs/heads/person:refs/remotes/origin/person
+          wrgl export --wrgl_dir /runner/_work/data/consolidate/ person > person.csv
+      #    wrgl pull --wrgl-dir /runner/_work/data/.wrgl --all --ignore-non-existent --no-progress
+      # - name: process data
+      #   run: |
+      #     sed -iE 's/dataDir\: data/dataDir\: \/runner\/_work\/data\/data/g' deba.yaml
+      #     echo "md5Dir: /runner/_work/data/md5" >> deba.yaml
+      #     make WRGL_FLAGS="--wrgl-dir /runner/_work/data/.wrgl" GSUTIL="$(which gsutil)"
+      #   env:
+      #     OCR_ENSURE_COMPLETE: "true"
       - name: list the processed csv
-        run: ls /runner/_work/data
+        run: ls /runner/_work/data/consolidate
       # - name: Connect sqlite
       #   run: python scripts/create_sqlite.py
       # - name: Connect postgres db
