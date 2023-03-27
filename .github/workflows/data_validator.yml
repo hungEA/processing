@@ -41,16 +41,16 @@ jobs:
           # service_account: 'k8s-ocr-jobqueue@excellent-zoo-300106.iam.gserviceaccount.com'
       # - name: check gcloud authen path
       #   run: gcloud auth application-default login
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1'
-        with:
-          version: '>= 415.0.0'
+      # - name: 'Set up Cloud SDK'
+      #   uses: 'google-github-actions/setup-gcloud@v1'
+      #   with:
+      #     version: '>= 415.0.0'
       # - name: check gcloud info
       #   run: gcloud info
-      - name: check cloud sdk location
-        run: ls -lsrt /usr/local/gcloud/google-cloud-sdk/bin
-      - name: install package for gsutil
-        run: pip install pyopenssl cryptography==38.0.4
+      # - name: check cloud sdk location
+      #   run: ls -lsrt /usr/local/gcloud/google-cloud-sdk/bin
+      # - name: install package for gsutil
+      #   run: pip install pyopenssl cryptography==38.0.4
       # - name: dvc pull
       #   shell: "bash --noprofile --norc -x -eo pipefail {0}"
       #   run: |
@@ -65,8 +65,8 @@ jobs:
           mkdir /runner/_work/data/.wrgl || true
           cp .wrgl/config.yaml /runner/_work/data/.wrgl/
           wrgl init --wrgl-dir /runner/_work/data/.wrgl || true
-          wrgl pull --wrgl_dir /runner/_work/data/consolidate/ pull person origin +refs/heads/person:refs/remotes/origin/person
-          wrgl export --wrgl_dir /runner/_work/data/consolidate/ person > person.csv
+          wrgl pull --wrgl-dir /runner/_work/data/.wrgl pull person origin +refs/heads/person:refs/remotes/origin/person
+          wrgl export --wrgl-dir /runner/_work/data/.wrgl person > /runner/_work/data/consolidate/person.csv
       #    wrgl pull --wrgl-dir /runner/_work/data/.wrgl --all --ignore-non-existent --no-progress
       # - name: process data
       #   run: |
