@@ -67,7 +67,17 @@ jobs:
           cp .wrgl/config.yaml /runner/_work/data/.wrgl/
           wrgl init --wrgl-dir /runner/_work/data/.wrgl || true
           wrgl pull person origin +refs/heads/person:refs/remotes/origin/person --wrgl-dir /runner/_work/data/.wrgl
+          wrgl pull personnel origin +refs/heads/personnel:refs/remotes/origin/personnel --wrgl-dir /runner/_work/data/.wrgl
+          wrgl pull event origin +refs/heads/event:refs/remotes/origin/event --wrgl-dir /runner/_work/data/.wrgl
+          wrgl pull use-of-force origin +refs/heads/use-of-force:refs/remotes/origin/use-of-force --wrgl-dir /runner/_work/data/.wrgl
+          wrgl pull appeals origin +refs/heads/appeals:refs/remotes/origin/appeals --wrgl-dir /runner/_work/data/.wrgl
+          wrgl pull allegation origin +refs/heads/allegation:refs/remotes/origin/allegation --wrgl-dir /runner/_work/data/.wrgl
           wrgl export --wrgl-dir /runner/_work/data/.wrgl person > /runner/_work/data/consolidate/person.csv
+          wrgl export --wrgl-dir /runner/_work/data/.wrgl personnel > /runner/_work/data/consolidate/personnel.csv
+          wrgl export --wrgl-dir /runner/_work/data/.wrgl event > /runner/_work/data/consolidate/event.csv
+          wrgl export --wrgl-dir /runner/_work/data/.wrgl use-of-force > /runner/_work/data/consolidate/use_of_force.csv
+          wrgl export --wrgl-dir /runner/_work/data/.wrgl appeals > /runner/_work/data/consolidate/appeals.csv
+          wrgl export --wrgl-dir /runner/_work/data/.wrgl allegation > /runner/_work/data/consolidate/allegation.csv
       #    wrgl pull --wrgl-dir /runner/_work/data/.wrgl --all --ignore-non-existent --no-progress
       # - name: process data
       #   run: |
