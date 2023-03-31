@@ -10,34 +10,34 @@ jobs:
     runs-on: "self-hosted"
     environment: DATA-VALIDATOR
 
-    # # Service containers to run with `container-job`
-    # services:
-    #   # Label used to access the service container
-    #   postgres:
-    #     # Docker Hub image
-    #     image: postgres:13.1
-    #     # Provide the password for postgres
-    #     env:
-    #       POSTGRES_USER: ipno
-    #       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-    #       POSTGRES_DB: ipno
-    #     # Set health checks to wait until postgres has started
-    #     options: >-
-    #       --health-cmd pg_isready
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
-    #     ports:
-    #       - 5432:5432
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:13.1
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: ipno
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ipno
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
       - uses: actions/checkout@v3
-      # - name: Install slack package
-      #   run: pip install slack_sdk==3.19.5
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v1'
-        with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+      - name: Install slack package
+        run: pip install slack_sdk==3.19.5
+      # - id: 'auth'
+      #   uses: 'google-github-actions/auth@v1'
+      #   with:
+      #     credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
           # service_account: 'k8s-ocr-jobqueue@excellent-zoo-300106.iam.gserviceaccount.com'
       # - name: check gcloud authen path
       #   run: gcloud auth application-default login
@@ -58,26 +58,26 @@ jobs:
       #     mkdir /runner/_work/data/dvc_cache || true
       #     dvc cache dir --local /runner/_work/data/dvc_cache
       #     dvc pull -v -f
-      - name: wrgl pull
-        run: |
-          wrgl config set --global user.email "gh-action@publicdata.works"
-          wrgl config set --global user.name "Github Action"
-          mkdir /runner/_work/data/.wrgl || true
-          mkdir /runner/_work/data/consolidate || true
-          cp .wrgl/config.yaml /runner/_work/data/.wrgl/
-          wrgl init --wrgl-dir /runner/_work/data/.wrgl || true
-          wrgl pull person origin +refs/heads/person:refs/remotes/origin/person --wrgl-dir /runner/_work/data/.wrgl
-          wrgl pull personnel origin +refs/heads/personnel:refs/remotes/origin/personnel --wrgl-dir /runner/_work/data/.wrgl
-          wrgl pull event origin +refs/heads/event:refs/remotes/origin/event --wrgl-dir /runner/_work/data/.wrgl
-          wrgl pull use-of-force origin +refs/heads/use-of-force:refs/remotes/origin/use-of-force --wrgl-dir /runner/_work/data/.wrgl
-          wrgl pull appeals origin +refs/heads/appeals:refs/remotes/origin/appeals --wrgl-dir /runner/_work/data/.wrgl
-          wrgl pull allegation origin +refs/heads/allegation:refs/remotes/origin/allegation --wrgl-dir /runner/_work/data/.wrgl
-          wrgl export --wrgl-dir /runner/_work/data/.wrgl person > /runner/_work/data/consolidate/person.csv
-          wrgl export --wrgl-dir /runner/_work/data/.wrgl personnel > /runner/_work/data/consolidate/personnel.csv
-          wrgl export --wrgl-dir /runner/_work/data/.wrgl event > /runner/_work/data/consolidate/event.csv
-          wrgl export --wrgl-dir /runner/_work/data/.wrgl use-of-force > /runner/_work/data/consolidate/use_of_force.csv
-          wrgl export --wrgl-dir /runner/_work/data/.wrgl appeals > /runner/_work/data/consolidate/appeals.csv
-          wrgl export --wrgl-dir /runner/_work/data/.wrgl allegation > /runner/_work/data/consolidate/allegation.csv
+      # - name: wrgl pull
+      #   run: |
+      #     wrgl config set --global user.email "gh-action@publicdata.works"
+      #     wrgl config set --global user.name "Github Action"
+      #     mkdir /runner/_work/data/.wrgl || true
+      #     mkdir /runner/_work/data/consolidate || true
+      #     cp .wrgl/config.yaml /runner/_work/data/.wrgl/
+      #     wrgl init --wrgl-dir /runner/_work/data/.wrgl || true
+      #     wrgl pull person origin +refs/heads/person:refs/remotes/origin/person --wrgl-dir /runner/_work/data/.wrgl
+      #     wrgl pull personnel origin +refs/heads/personnel:refs/remotes/origin/personnel --wrgl-dir /runner/_work/data/.wrgl
+      #     wrgl pull event origin +refs/heads/event:refs/remotes/origin/event --wrgl-dir /runner/_work/data/.wrgl
+      #     wrgl pull use-of-force origin +refs/heads/use-of-force:refs/remotes/origin/use-of-force --wrgl-dir /runner/_work/data/.wrgl
+      #     wrgl pull appeals origin +refs/heads/appeals:refs/remotes/origin/appeals --wrgl-dir /runner/_work/data/.wrgl
+      #     wrgl pull allegation origin +refs/heads/allegation:refs/remotes/origin/allegation --wrgl-dir /runner/_work/data/.wrgl
+      #     wrgl export --wrgl-dir /runner/_work/data/.wrgl person > /runner/_work/data/consolidate/person.csv
+      #     wrgl export --wrgl-dir /runner/_work/data/.wrgl personnel > /runner/_work/data/consolidate/personnel.csv
+      #     wrgl export --wrgl-dir /runner/_work/data/.wrgl event > /runner/_work/data/consolidate/event.csv
+      #     wrgl export --wrgl-dir /runner/_work/data/.wrgl use-of-force > /runner/_work/data/consolidate/use_of_force.csv
+      #     wrgl export --wrgl-dir /runner/_work/data/.wrgl appeals > /runner/_work/data/consolidate/appeals.csv
+      #     wrgl export --wrgl-dir /runner/_work/data/.wrgl allegation > /runner/_work/data/consolidate/allegation.csv
       #    wrgl pull --wrgl-dir /runner/_work/data/.wrgl --all --ignore-non-existent --no-progress
       # - name: process data
       #   run: |
@@ -86,19 +86,19 @@ jobs:
       #     make WRGL_FLAGS="--wrgl-dir /runner/_work/data/.wrgl" GSUTIL="$(which gsutil)"
       #   env:
       #     OCR_ENSURE_COMPLETE: "true"
-      - name: list the processed csv
-        run: ls /runner/_work/data/consolidate
+      # - name: list the processed csv
+      #   run: ls /runner/_work/data/consolidate
       # - name: Connect sqlite
       #   run: python scripts/create_sqlite.py
-      # - name: Connect postgres db
-      #   run: python data-validator/setup_be_db.py
-      #   env:
-      #     # The hostname used to communicate with the PostgreSQL service container
-      #     POSTGRES_HOST: localhost
-      #     # The default PostgreSQL port
-      #     POSTGRES_PORT: 5432
-      #     POSTGRES_DB: ipno
-      #     POSTGRES_USER: ipno
-      #     POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      #     SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      #     SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+      - name: Connect postgres db
+        run: python data-validator/setup_be_db.py
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          POSTGRES_HOST: localhost
+          # The default PostgreSQL port
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: ipno
+          POSTGRES_USER: ipno
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}

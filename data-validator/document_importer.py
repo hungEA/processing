@@ -1,8 +1,7 @@
 import os
-import numpy as np
 import pandas as pd
-from wrgl import Repository
 from slack_sdk import WebClient
+from wrgl import Repository
 
 
 DOCUMENT_COLS = [
@@ -12,6 +11,10 @@ DOCUMENT_COLS = [
     'hrg_text', 'title', 'agency'
 ]
 
+# According to this post https://eastagile.slack.com/archives/C044F7LTASV/p1680028339523139?thread_ts=1679905963.191559&cid=C044F7LTASV
+# documents are not saved to fuse folder or going through the same process
+# of https://github.com/ipno-llead/processing
+# Therefore we need to retrieve it from WRGL
 
 def __retrieve_document_frm_wrgl_data():
     repo = Repository("https://wrgl.llead.co/", None)
@@ -31,18 +34,19 @@ def __retrieve_document_frm_wrgl_data():
     df.to_csv('documents.csv', index=False)
 
 
-def __build_document_rel(conn):
+def __build_document_rel(db_con):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
+
     print('Building documents_officers relationship')
     documents_df = pd.read_sql(
         'SELECT id, docid, matched_uid, agency FROM documents_document',
-        con=conn
+        con=db_con
     )
     documents_df.columns = ['document_id', 'docid', 'uid', 'agency_slug']
 
     officers_df = pd.read_sql(
         'SELECT id, uid FROM officers_officer',
-        con=conn
+        con=db_con
     )
     officers_df.columns = ['officer_id', 'uid']
 
@@ -50,23 +54,21 @@ def __build_document_rel(conn):
 
     no_officers_in_documents = documents_df['uid'].dropna().unique()
     print('Number of officers in WRGL documents', len(no_officers_in_documents))
-
     diff_officers = set(no_officers_in_documents) - set(officers_df['uid'])
     print('Number of differences in officers', len(diff_officers))
 
-    # if len(dor_df) < len(no_officers_in_documents):
     if len(diff_officers) > 0:
-        with open('no_officers_in_documents.csv', 'w') as fwriter:
+        with open('diff_officers_of_documents.csv', 'w') as fwriter:
             fwriter.write('\n'.join(list(diff_officers)))
 
-        # Temporarily disabled to pass the check in order to continue developing
-        # client.files_upload(
-        #     channels=os.environ.get('SLACK_CHANNEL'),
-        #     title="Number of officers in documents",
-        #     file="./no_officers_in_documents.csv",
-        #     initial_comment="The following file provides a list of matched_uid in documents that cannot map to officers:",
-        # )
-        # raise Exception('There is anomaly in the number of officers in documents')
+        client.files_upload(
+            channels=os.environ.get('SLACK_CHANNEL'),
+            title="Diff of officers of documents",
+            file="./diff_officers_of_documents.csv",
+            initial_comment="The following file provides a list of matched_uid in documents that cannot map to officers:",
+        )
+
+        raise Exception('There is anomaly in the number of officers in documents')
 
     dor_df.dropna(subset=['officer_id'], inplace=True)
 
@@ -80,7 +82,7 @@ def __build_document_rel(conn):
     print('Building documents_agency relationship')
     agency_df = pd.read_sql(
         'SELECT id, agency_slug FROM departments_department',
-        con=conn
+        con=db_con
     )
     agency_df.columns = ['department_id', 'agency_slug']
 
@@ -88,21 +90,20 @@ def __build_document_rel(conn):
 
     no_agency_in_documents = documents_df['agency_slug'].dropna().unique()
     print('Number of agency in WRGL documents', len(no_agency_in_documents))
-
     diff_agency = set(no_agency_in_documents) - set(agency_df['agency_slug'])
     print('Number of differences in agency', len(diff_agency))
 
     if len(diff_agency) > 0:
-        with open('no_agency_in_documents.csv', 'w') as fwriter:
+        with open('diff_agency_of_documents.csv', 'w') as fwriter:
             fwriter.write('\n'.join(list(diff_agency)))
 
-        # Temporarily disabled to pass the check in order to continue developing
         client.files_upload(
             channels=os.environ.get('SLACK_CHANNEL'),
-            title="Number of agency in documents",
-            file="./no_agency_in_documents.csv",
+            title="Diff of agency of documents",
+            file="./diff_agency_of_documents.csv",
             initial_comment="The following file provides a list of agency in documents that cannot map to department:",
         )
+
         raise Exception('There is anomaly in the number of agency in documents')
 
     ddr_df.dropna(subset=['department_id'], inplace=True)
@@ -115,10 +116,10 @@ def __build_document_rel(conn):
     ddr_df.to_csv('documents_departments_rel.csv', index=False)
 
 
-def import_document(conn):
+def import_document(db_con):
     __retrieve_document_frm_wrgl_data()
 
-    cursor = conn.cursor()
+    cursor = db_con.cursor()
     cursor.copy_expert(
         sql="""
             COPY documents_document(
@@ -131,13 +132,13 @@ def import_document(conn):
         """,
         file=open('documents.csv', 'r'),
     )
-    conn.commit()
+    db_con.commit()
     cursor.close()
 
-    __build_document_rel(conn)
+    __build_document_rel(db_con)
 
     print('Importing documents and officers relationship')
-    cursor = conn.cursor()
+    cursor = db_con.cursor()
     cursor.copy_expert(
         sql="""
             COPY documents_document_officers(
@@ -147,17 +148,17 @@ def import_document(conn):
         """,
         file=open('documents_officers_rel.csv', 'r'),
     )
-    conn.commit()
+    db_con.commit()
     cursor.close()
 
     count = pd.read_sql(
         'SELECT COUNT(*) FROM documents_document_officers',
-        con=conn
+        con=db_con
     )
-    print('Number of records in documents_officers rel', count.iloc[0])
+    print('Number of records in documents_officers rel', count.iloc[0][0])
 
     print('Importing documents and agency relationship')
-    cursor = conn.cursor()
+    cursor = db_con.cursor()
     cursor.copy_expert(
         sql="""
             COPY documents_document_departments(
@@ -167,11 +168,11 @@ def import_document(conn):
         """,
         file=open('documents_departments_rel.csv', 'r'),
     )
-    conn.commit()
+    db_con.commit()
     cursor.close()
 
     count = pd.read_sql(
         'SELECT COUNT(*) FROM documents_document_departments',
-        con=conn
+        con=db_con
     )
-    print('Number of records in documents_departments rel', count.iloc[0])
+    print('Number of records in documents_departments rel', count.iloc[0][0])

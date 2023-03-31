@@ -1957,13 +1957,13 @@ ALTER SEQUENCE public.officers_officer_id_seq OWNED BY public.officers_officer.i
 
 CREATE TABLE public.people_person (
     id integer NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     person_id character varying(255),
     canonical_officer_id integer NOT NULL,
     all_complaints_count integer,
     canonical_uid character varying(255),
-    uids character varying(255)
+    uid character varying(255)
 );
 
 

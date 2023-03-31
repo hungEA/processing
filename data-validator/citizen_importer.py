@@ -1,7 +1,7 @@
 import os
 import pandas as pd
-from wrgl import Repository
 from slack_sdk import WebClient
+# from wrgl import Repository
 
 
 CITIZEN_COLS = [
@@ -11,53 +11,63 @@ CITIZEN_COLS = [
 ]
 
 
-def __retrieve_citizen_frm_wrgl_data(branch=None):
-    repo = Repository("https://wrgl.llead.co/", None)
+# def __retrieve_citizen_frm_wrgl_data(branch=None):
+#     repo = Repository("https://wrgl.llead.co/", None)
 
-    original_commit = repo.get_branch("citizens")
+#     original_commit = repo.get_branch("citizens")
 
-    columns = original_commit.table.columns
-    if not set(CITIZEN_COLS).issubset(set(columns)):
-        raise Exception('BE citizens columns are not recognized in the current commit')
+#     columns = original_commit.table.columns
+#     if not set(CITIZEN_COLS).issubset(set(columns)):
+#         raise Exception('BE citizens columns are not recognized in the current commit')
 
-    all_rows = list(repo.get_blocks("heads/citizens"))
-    df = pd.DataFrame(all_rows)
-    df.columns = df.iloc[0]
-    df = df.iloc[1:].reset_index(drop=True)
+#     all_rows = list(repo.get_blocks("heads/citizens"))
+#     df = pd.DataFrame(all_rows)
+#     df.columns = df.iloc[0]
+#     df = df.iloc[1:].reset_index(drop=True)
 
-    df.to_csv('citizens.csv', index=False)
+#     df.to_csv('citizens.csv', index=False)
 
 
-def __build_citizen_rel(conn):
+def __build_citizen_rel(db_con):
+    client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
+
     print('Building relationship between agency and citizens')
-    citizen_df = pd.read_csv('citizens.csv')
+    citizens_df = pd.read_csv(
+        os.path.join(os.environ.get('DATA_DIR'), 'citizens.csv')
+    )
 
     agency_df = pd.read_sql(
         'SELECT id, agency_slug FROM departments_department',
-        con=conn
+        con=db_con
     )
     agency_df.columns = ['department_id', 'agency']
 
-    result = pd.merge(citizen_df, agency_df, how='left', on='agency')
+    result = pd.merge(citizens_df, agency_df, how='left', on='agency')
 
     print('Check agency id after merged')
     null_department_data = result[result['department_id'].isnull()]
     if len(null_department_data) > 0:
-        # client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
-        # null_data.to_csv('null_agency_of_citizen.csv', index=False)
+        null_department_data.drop_duplicates(subset=['agency'], inplace=True)
+        null_department_data.to_csv(
+            'null_agency_of_citizen.csv',
+            columns=['agency'],
+            index=False,
+            header=False
+        )
 
-        # # Temporarily disabled to pass the check in order to continue developing
-        # client.files_upload(
-        #     channels=os.environ.get('SLACK_CHANNEL'),
-        #     title="Null agency of citizen",
-        #     file="./null_agency_of_citizen.csv",
-        #     initial_comment="The following file provides a list of agency that cannot map to citizen:",
+        client.files_upload(
+            channels=os.environ.get('SLACK_CHANNEL'),
+            title="Null agency of citizen",
+            file="./null_agency_of_citizen.csv",
+            initial_comment="The following file provides a list of agency in citizens that cannot map to departments:",
+        )
+
         raise Exception('Cannot map agency to citizen')
 
     print('Build relationship between complaints and citizens')
     complaints_df = pd.read_sql(
         'SELECT id, allegation_uid FROM complaints_complaint',
-        con=conn
+        con=db_con
     )
     complaints_df.columns = ['complaint_id', 'allegation_uid']
 
@@ -66,7 +76,7 @@ def __build_citizen_rel(conn):
     print('Build relationship between uof and citizens')
     uof_df = pd.read_sql(
         'SELECT id, uof_uid FROM use_of_forces_useofforce',
-        con=conn
+        con=db_con
     )
     uof_df.columns = ['uof_id', 'uof_uid']
 
@@ -82,11 +92,10 @@ def __build_citizen_rel(conn):
     result.to_csv('citizens.csv', index=False)
 
 
-def import_citizen(conn):
-    __retrieve_citizen_frm_wrgl_data()
-    __build_citizen_rel(conn)
+def import_citizen(db_con):
+    __build_citizen_rel(db_con)
 
-    cursor = conn.cursor()
+    cursor = db_con.cursor()
     cursor.copy_expert(
         sql="""
             COPY citizens_citizen(
@@ -98,7 +107,7 @@ def import_citizen(conn):
         """,
         file=open('citizens.csv', 'r'),
     )
-    conn.commit()
+    db_con.commit()
     cursor.close()
 
     df = pd.read_sql('''
@@ -106,7 +115,7 @@ def import_citizen(conn):
             agency, department_id, complaint_id, use_of_force_id
         FROM citizens_citizen
         ''',
-        con=conn
+        con=db_con
     )
 
     print('List top 10 citizen')
