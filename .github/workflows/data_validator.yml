@@ -90,7 +90,13 @@ jobs:
       #   run: ls /runner/_work/data/consolidate
       # - name: Connect sqlite
       #   run: python scripts/create_sqlite.py
-      - name: Connect postgres db
+      # - name: Get BE schema
+      #   run: curl -o -H {toke} be_schema.sql
+      - name: Replace unnecessary fields in db schema
+        run: |
+          sed -i 's/created_at/-- created_at/g' dvc/sql/be_schema.sql
+          sed -i 's/updated_at/-- updated_at/g' dvc/sql/be_schema.sql
+      - name: Execute data validator
         run: python data-validator/data_validator.py
         env:
           # The hostname used to communicate with the PostgreSQL service container
