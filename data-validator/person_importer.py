@@ -4,7 +4,7 @@ from slack_sdk import WebClient
 # from wrgl import Repository
 
 
-PERSON_COLS = ['person_id', 'canonical_uid', 'uid']
+PERSON_COLS = ['person_id', 'canonical_uid', 'uids']
 
 
 # def __retrieve_person_frm_wrgl_data(branch=None):
@@ -31,32 +31,8 @@ def __build_person_rel(db_con):
         os.path.join(os.environ.get('DATA_DIR'), 'person.csv')
     )
 
-    officer_df = pd.read_sql('SELECT id, uid FROM officers_officer', con=db_con)
-    officer_df.columns = ['officer_id', 'uid']
-
-    uid_df = pd.merge(person_df, officer_df, how='left', on='uid')
-
-    print('Check officer id after merged')
-    null_officer_data = uid_df[uid_df['officer_id'].isnull()]
-    if len(null_officer_data) > 0:
-        null_officer_data.drop_duplicates(subset=['uid'], inplace=True)
-        null_officer_data.to_csv(
-            'null_officers_of_person.csv',
-            columns=['uid'],
-            index=False,
-            header=False
-        )
-
-        client.files_upload(
-            channels=os.environ.get('SLACK_CHANNEL'),
-            title="Null officers of person",
-            file="./null_officers_of_person.csv",
-            initial_comment="The following file provides a list of uids in person that cannot map to personnel:",
-        )
-
-        raise Exception('Cannot map uid in person to personnel')
-
     print('Build canonical_officer rel')
+    officer_df = pd.read_sql('SELECT id, uid FROM officers_officer', con=db_con)
     officer_df.columns = ['officer_canonical_id', 'canonical_uid']
 
     result = pd.merge(person_df, officer_df, how='left', on='canonical_uid')
@@ -88,8 +64,44 @@ def __build_person_rel(db_con):
 def __update_person_id_in_officer(db_con):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
 
-    person_df = pd.read_sql('SELECT id, uid FROM people_person', con=db_con)
-    person_df.drop_duplicates(inplace=True)
+    person_df = pd.read_sql('SELECT id, uids FROM people_person', con=db_con)
+    person_df = (
+        person_df.drop("uids", axis=1)
+        .join(
+            person_df["uids"]
+            .str.split(",", expand=True)
+            .stack()
+            .reset_index(level=1, drop=True)
+            .rename("uid"),
+            how="outer",
+        )
+        .reset_index(drop=True)
+    )
+
+    officer_df = pd.read_sql('SELECT id, uid FROM officers_officer', con=db_con)
+    officer_df.columns = ['officer_id', 'uid']
+
+    uid_df = pd.merge(person_df, officer_df, how='left', on='uid')
+
+    print('Check officer id after merged')
+    null_officer_data = uid_df[uid_df['officer_id'].isnull()]
+    if len(null_officer_data) > 0:
+        null_officer_data.drop_duplicates(subset=['uid'], inplace=True)
+        null_officer_data.to_csv(
+            'null_officers_of_person.csv',
+            columns=['uid'],
+            index=False,
+            header=False
+        )
+
+        client.files_upload(
+            channels=os.environ.get('SLACK_CHANNEL'),
+            title="Null officers of person",
+            file="./null_officers_of_person.csv",
+            initial_comment="The following file provides a list of uids in person that cannot map to personnel:",
+        )
+
+        raise Exception('Cannot map uid in person to personnel')
 
     print('Updating person_id in officers')
     cursor = db_con.cursor()
@@ -135,7 +147,7 @@ def import_person(db_con):
     cursor.copy_expert(
         sql="""
             COPY people_person(
-                person_id, canonical_uid, uid, canonical_officer_id
+                person_id, canonical_uid, uids, canonical_officer_id
             ) FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
@@ -144,11 +156,10 @@ def import_person(db_con):
     db_con.commit()
     cursor.close()
 
-    # Temporarily disabled to pass the check in order to continue developing
-    # __update_person_id_in_officer(db_con)
+    __update_person_id_in_officer(db_con)
 
     df = pd.read_sql('''
-        SELECT canonical_uid, uid, canonical_officer_id
+        SELECT canonical_uid, uids, canonical_officer_id
         FROM people_person
         ''',
         con=db_con

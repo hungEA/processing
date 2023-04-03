@@ -27,9 +27,26 @@ OFFICER_COLS = [
 #     df.to_csv('officer.csv', index=False)
 
 
-def __preprocess_officer(agency_df):
+def __build__officer_rel(agency_df):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
     officer_df = pd.read_csv(os.path.join(os.environ.get('DATA_DIR'), 'personnel.csv'))
+
+    print('Check for duplicated records')
+    check_dup_officers = officer_df[officer_df.duplicated(['uid', 'agency'])]
+    if len(check_dup_officers) > 0:
+        check_dup_officers.to_csv(
+            'duplicated_officers.csv',
+            index=False
+        )
+
+        client.files_upload(
+            channels=os.environ.get('SLACK_CHANNEL'),
+            title='Duplicated officers',
+            file="./duplicated_officers.csv",
+            initial_comment='The following file provides a list of duplicated personnels:',
+        )
+
+        raise Exception('There are duplicated records in personnel')
 
     result = pd.merge(officer_df, agency_df, how='left', on='agency')
 
@@ -46,9 +63,9 @@ def __preprocess_officer(agency_df):
 
         client.files_upload(
             channels=os.environ.get('SLACK_CHANNEL'),
-            title="Null agency of officers",
+            title='Null agency of officers',
             file="./null_agency_of_officers.csv",
-            initial_comment="The following file provides a list of agency in personnels that cannot map to departments:",
+            initial_comment='The following file provides a list of agency in personnels that cannot map to departments:',
         )
 
         raise Exception('Cannot map officer to agency')
@@ -66,7 +83,7 @@ def import_officer(db_con):
     agency_df = pd.read_sql('SELECT id, agency_slug FROM departments_department', db_con)
     agency_df.columns = ['department_id', 'agency']
 
-    __preprocess_officer(agency_df)
+    __build__officer_rel(agency_df)
 
     cursor = db_con.cursor()
     cursor.copy_expert(
