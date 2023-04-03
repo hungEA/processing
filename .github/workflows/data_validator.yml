@@ -90,15 +90,20 @@ jobs:
       #   run: ls /runner/_work/data/consolidate
       # - name: Connect sqlite
       #   run: python scripts/create_sqlite.py
-      # - name: Get BE schema
-      #   run: curl -o -H {toke} be_schema.sql
+      - name: Get BE schema
+        run: |
+          token=$(curl -X POST https://api-staging.llead.co/api/token/ -H "Content-Type: application/json" -d '{"email": "'"$BE_SCHEMA_USER"'", "password": "'"$BE_SCHEMA_PASSWORD"'"}' | jq '.access' -r)
+          curl -X GET https://api-staging.llead.co/api/schemas/validate/ -H "Authorization: Bearer $token" -o be_schema.sql
+        env:
+          BE_SCHEMA_USER: ${{ secrets.BE_SCHEMA_USER }}
+          BE_SCHEMA_PASSWORD: ${{ secrets.BE_SCHEMA_PASSWORD }}
       - name: Replace unnecessary fields in db schema
         run: |
-          sed -i 's/^\s*created_at/-- created_at/g' dvc/sql/be_schema.sql
-          sed -i 's/^\s*updated_at/-- updated_at/g' dvc/sql/be_schema.sql
-          sed -i 's/^\s*aliases/-- aliases/g' dvc/sql/be_schema.sql
-          sed -i 's/^\s*is_name_changed/-- is_name_changed/g' dvc/sql/be_schema.sql
-          sed -i 's/^\s*be_/-- be_/g' dvc/sql/be_schema.sql
+          sed -i 's/^\s*created_at/-- created_at/g' be_schema.sql
+          sed -i 's/^\s*updated_at/-- updated_at/g' be_schema.sql
+          sed -i 's/^\s*aliases/-- aliases/g' be_schema.sql
+          sed -i 's/^\s*is_name_changed/-- is_name_changed/g' be_schema.sql
+          sed -i 's/^\s*be_/-- be_/g' be_schema.sql
       - name: Execute data validator
         run: python data-validator/data_validator.py
         env:

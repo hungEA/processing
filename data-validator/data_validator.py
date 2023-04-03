@@ -22,21 +22,10 @@ conn = psycopg2.connect(
    host=os.environ.get('POSTGRES_HOST', 'localhost'),
    port=os.environ.get('POSTGRES_PORT', '5432')
 )
-#Creating a cursor object using the cursor() method
-cursor = conn.cursor()
 
-#Executing an MYSQL function using the execute() method
-cursor.execute("SELECT version()")
-
-# Fetch a single row using fetchone() method.
-data = cursor.fetchone()
-print("Connection established to: ", data)
-
-cursor.close()
-
-cursor = conn.cursor()
 print('Building schema of BE Database')
-cursor.execute(open("dvc/sql/be_schema.sql", "r").read())
+cursor = conn.cursor()
+cursor.execute(open("be_schema.sql", "r").read())
 
 conn.commit()
 cursor.close()
