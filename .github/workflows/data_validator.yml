@@ -96,7 +96,8 @@ jobs:
         run: |
           sed -i 's/created_at/-- created_at/g' dvc/sql/be_schema.sql
           sed -i 's/updated_at/-- updated_at/g' dvc/sql/be_schema.sql
-          sed -i 's/is_name_changed/-- is_name_changed/g' dvc/sql/be_schema.sql
+          sed -i 's/^is_name_changed/-- is_name_changed/g' dvc/sql/be_schema.sql
+          sed -i 's/^be_/-- be_/g' dvc/sql/be_schema.sql
       - name: Execute data validator
         run: python data-validator/data_validator.py
         env:

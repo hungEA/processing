@@ -1963,6 +1963,7 @@ CREATE TABLE public.people_person (
     canonical_officer_id integer NOT NULL,
     all_complaints_count integer,
     canonical_uid character varying(255),
+    be_modified boolean NOT NULL,
     uids character varying(255)
 );
 
