@@ -1918,7 +1918,7 @@ CREATE TABLE public.officers_officer (
     birth_day integer,
     race character varying(255),
     person_id integer,
-    -- is_name_changed boolean NOT NULL,
+    is_name_changed boolean NOT NULL,
     sex character varying(255),
     agency character varying(255),
     department_id integer,
