@@ -101,7 +101,7 @@ jobs:
           BE_SCHEMA_URL: ${{ vars.BE_SCHEMA_URL }}
       - name: Replace unnecessary fields in db schema
         run: |
-          sed -i 's/SELECT pg_catalog.set_config('search_path', '', false);//g' be_schema.sql
+          sed -i 's/SELECT pg_catalog\.set_config\(\'search_path\', \'\', false\);//g' be_schema.sql
           sed -i 's/^\s*created_at/-- created_at/g' be_schema.sql
           sed -i 's/^\s*updated_at/-- updated_at/g' be_schema.sql
           sed -i 's/^\s*aliases/-- aliases/g' be_schema.sql
