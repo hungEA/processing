@@ -92,7 +92,8 @@ jobs:
       #   run: python scripts/create_sqlite.py
       - name: Get BE schema
         run: |
-          token=$(curl -X POST $BE_SCHEMA_URL/api/token/ -H "Content-Type: application/json" -d '{"email": "'"$BE_SCHEMA_USER"'", "password": "'"$BE_SCHEMA_PASSWORD"'"}' | jq '.access' -r)
+          echo $BE_SCHEMA_URL
+          token=$(curl -X POST $BE_SCHEMA_URL/token/ -H "Content-Type: application/json" -d '{"email": "'"$BE_SCHEMA_USER"'", "password": "'"$BE_SCHEMA_PASSWORD"'"}' | jq '.access' -r)
           curl -X GET $BE_SCHEMA_URL/schemas/validate/ -H "Authorization: Bearer $token" -o be_schema.sql
         env:
           BE_SCHEMA_USER: ${{ secrets.BE_SCHEMA_USER }}
