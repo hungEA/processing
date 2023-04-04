@@ -27,7 +27,7 @@ APPEAL_COLS = [
 #     df.to_csv('appeals.csv', index=False)
 
 
-def __build_appeal_rel(conn):
+def __build_appeal_rel(db_con):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
 
     print('Check integrity between officers\' agency and appeal agency')
@@ -37,7 +37,7 @@ def __build_appeal_rel(conn):
 
     officers_df = pd.read_sql(
         'SELECT id, uid, agency FROM officers_officer',
-        con=conn
+        con=db_con
     )
     officers_df.columns = ['officer_id', 'uid', 'officer_agency_slug']
 
@@ -70,7 +70,7 @@ def __build_appeal_rel(conn):
 
     agency_df = pd.read_sql(
         'SELECT id, agency_slug FROM departments_department',
-        con=conn
+        con=db_con
     )
     agency_df.columns = ['department_id', 'agency_slug']
 
@@ -94,10 +94,10 @@ def __build_appeal_rel(conn):
     result.to_csv('appeals.csv', index=False)
 
 
-def import_appeal(conn):
-    __build_appeal_rel(conn)
+def import_appeal(db_con):
+    __build_appeal_rel(db_con)
 
-    cursor = conn.cursor()
+    cursor = db_con.cursor()
     cursor.copy_expert(
         sql="""
             COPY appeals_appeal(
@@ -108,16 +108,11 @@ def import_appeal(conn):
         """,
         file=open('appeals.csv', 'r'),
     )
-    conn.commit()
+    db_con.commit()
     cursor.close()
 
-    df = pd.read_sql('''
-        SELECT appeal_uid, uid, charging_supervisor, appeal_disposition,
-            action_appealed, agency, motions, officer_id, department_id
-        FROM appeals_appeal
-        ''',
-        con=conn
+    count = pd.read_sql(
+        'SELECT COUNT(*) FROM appeals_appeal',
+        con=db_con
     )
-
-    print('List top 10 appeal')
-    print(df.head(10))
+    print('Number of records in appeal', count.iloc[0][0])

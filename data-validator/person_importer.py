@@ -158,12 +158,8 @@ def import_person(db_con):
 
     __update_person_id_in_officer(db_con)
 
-    df = pd.read_sql('''
-        SELECT canonical_uid, uids, canonical_officer_id
-        FROM people_person
-        ''',
+    count = pd.read_sql(
+        'SELECT COUNT(*) FROM people_person',
         con=db_con
     )
-
-    print('List top 10 events')
-    print(df.head(10))
+    print('Number of records in person', count.iloc[0][0])

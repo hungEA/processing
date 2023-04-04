@@ -42,10 +42,8 @@ def import_department(db_con):
     db_con.commit()
     cursor.close()
 
-    df = pd.read_sql(
-        'SELECT agency_slug, agency_name, location FROM departments_department',
+    count = pd.read_sql(
+        'SELECT COUNT(*) FROM departments_department',
         con=db_con
     )
-
-    print('List top 10 agency')
-    print(df.head(10))
+    print('Number of records in department', count.iloc[0][0])

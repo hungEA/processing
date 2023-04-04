@@ -203,13 +203,8 @@ def import_event(db_con):
     db_con.commit()
     cursor.close()
 
-    df = pd.read_sql('''
-        SELECT event_uid, uid, agency, appeal_uid, uof_uid,
-            officer_id, department_id, appeal_id, use_of_force_id
-        FROM officers_event
-        ''',
+    count = pd.read_sql(
+        'SELECT COUNT(*) FROM officers_event',
         con=db_con
     )
-
-    print('List top 10 events')
-    print(df.head(10))
+    print('Number of records in event', count.iloc[0][0])

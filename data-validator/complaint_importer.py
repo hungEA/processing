@@ -160,7 +160,7 @@ def import_complaint(db_con):
 
     __build_complaints_relationship(db_con)
 
-    print('Importing complaints and officers relationship')
+    # Importing complaints and officers relationship'
     cursor = db_con.cursor()
     cursor.copy_expert(
         sql="""
@@ -180,7 +180,7 @@ def import_complaint(db_con):
     )
     print('Number of records in complaints_officers rel', count.iloc[0][0])
 
-    print('Importing complaints and agency relationship')
+    # Importing complaints and agency relationship
     cursor = db_con.cursor()
     cursor.copy_expert(
         sql="""

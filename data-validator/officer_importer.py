@@ -99,13 +99,8 @@ def import_officer(db_con):
     db_con.commit()
     cursor.close()
 
-    df = pd.read_sql('''
-        SELECT uid, last_name, middle_name, first_name, birth_year,
-                birth_month, birth_day, race, sex, agency, department_id
-        FROM officers_officer
-        ''',
+    count = pd.read_sql(
+        'SELECT COUNT(*) FROM officers_officer',
         con=db_con
     )
-
-    print('List top 10 officers')
-    print(df.head(10))
+    print('Number of records in officer', count.iloc[0][0])

@@ -110,13 +110,8 @@ def import_citizen(db_con):
     db_con.commit()
     cursor.close()
 
-    df = pd.read_sql('''
-        SELECT citizen_uid, allegation_uid, uof_uid,
-            agency, department_id, complaint_id, use_of_force_id
-        FROM citizens_citizen
-        ''',
+    count = pd.read_sql(
+        'SELECT COUNT(*) FROM citizens_citizen',
         con=db_con
     )
-
-    print('List top 10 citizen')
-    print(df.head(10))
+    print('Number of records in citizen', count.iloc[0][0])

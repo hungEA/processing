@@ -27,7 +27,7 @@ UOF_COLS = [
 #     df.to_csv('uof.csv', index=False)
 
 
-def __build_uof_rel(conn):
+def __build_uof_rel(db_con):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
 
     print('Check integrity between officers\' agency and uof agency')
@@ -37,7 +37,7 @@ def __build_uof_rel(conn):
 
     officers_df = pd.read_sql(
         'SELECT id, uid, agency FROM officers_officer',
-        con=conn
+        con=db_con
     )
     officers_df.columns = ['officer_id', 'uid', 'officer_agency_slug']
 
@@ -70,7 +70,7 @@ def __build_uof_rel(conn):
 
     agency_df = pd.read_sql(
         'SELECT id, agency_slug FROM departments_department',
-        con=conn
+        con=db_con
     )
     agency_df.columns = ['department_id', 'agency_slug']
 
@@ -94,10 +94,10 @@ def __build_uof_rel(conn):
     result.to_csv('uof.csv', index=False)
 
 
-def import_uof(conn):
-    __build_uof_rel(conn)
+def import_uof(db_con):
+    __build_uof_rel(db_con)
 
-    cursor = conn.cursor()
+    cursor = db_con.cursor()
     cursor.copy_expert(
         sql="""
             COPY use_of_forces_useofforce(
@@ -109,17 +109,11 @@ def import_uof(conn):
         """,
         file=open('uof.csv', 'r'),
     )
-    conn.commit()
+    db_con.commit()
     cursor.close()
 
-    df = pd.read_sql('''
-        SELECT uid, uof_uid, tracking_id, service_type, disposition,
-            use_of_force_description, officer_injured, agency, use_of_force_reason,
-            officer_id, department_id
-        FROM use_of_forces_useofforce
-        ''',
-        con=conn
+    count = pd.read_sql(
+        'SELECT COUNT(*) FROM use_of_forces_useofforce',
+        con=db_con
     )
-
-    print('List top 10 uof')
-    print(df.head(10))
+    print('Number of records in useofforce', count.iloc[0][0])

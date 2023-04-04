@@ -137,7 +137,7 @@ def import_document(db_con):
 
     __build_document_rel(db_con)
 
-    print('Importing documents and officers relationship')
+    # Importing documents and officers relationship
     cursor = db_con.cursor()
     cursor.copy_expert(
         sql="""
@@ -157,7 +157,7 @@ def import_document(db_con):
     )
     print('Number of records in documents_officers rel', count.iloc[0][0])
 
-    print('Importing documents and agency relationship')
+    # Importing documents and agency relationship
     cursor = db_con.cursor()
     cursor.copy_expert(
         sql="""
