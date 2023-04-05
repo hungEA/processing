@@ -4,12 +4,6 @@ from slack_sdk import WebClient
 # from wrgl import Repository
 
 
-OFFICER_COLS = [
-    'uid', 'last_name', 'middle_name', 'first_name', 'birth_year',
-    'birth_month', 'birth_day', 'race', 'sex', 'agency'
-]
-
-
 # def __retrieve_officer_frm_wrgl_data(branch=None):
 #     repo = Repository("https://wrgl.llead.co/", None)
 
@@ -27,9 +21,14 @@ OFFICER_COLS = [
 #     df.to_csv('officer.csv', index=False)
 
 
-def __build__officer_rel(agency_df):
+def __build__officer_rel(db_con, officer_df, officer_cols):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
-    officer_df = pd.read_csv(os.path.join(os.environ.get('DATA_DIR'), 'personnel.csv'))
+
+    agency_df = pd.read_sql(
+        'SELECT id, agency_slug FROM departments_department',
+        db_con
+    )
+    agency_df.columns = ['department_id', 'agency']
 
     print('Check for duplicated records')
     check_dup_officers = officer_df[officer_df.duplicated(['uid', 'agency'])]
@@ -76,25 +75,21 @@ def __build__officer_rel(agency_df):
         'birth_month': pd.Int64Dtype(),
         'birth_day': pd.Int64Dtype()
     })
-    result.to_csv('officer.csv', index=False)
+    result = result.loc[:, officer_cols]
+    result.to_csv('officers.csv', index=False)
 
 
-def import_officer(db_con):
-    agency_df = pd.read_sql('SELECT id, agency_slug FROM departments_department', db_con)
-    agency_df.columns = ['department_id', 'agency']
-
-    __build__officer_rel(agency_df)
+def run(db_con, officer_df, officer_cols):
+    __build__officer_rel(db_con, officer_df, officer_cols)
 
     cursor = db_con.cursor()
     cursor.copy_expert(
-        sql="""
-            COPY officers_officer(
-                uid, last_name, middle_name, first_name, birth_year,
-                birth_month, birth_day, race, sex, agency, department_id
-            ) FROM stdin WITH CSV HEADER
+        sql=f"""
+            COPY officers_officer({', '.join(officer_cols)})
+            FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
-        file=open('officer.csv', 'r'),
+        file=open('officers.csv', 'r'),
     )
     db_con.commit()
     cursor.close()

@@ -4,13 +4,6 @@ from slack_sdk import WebClient
 # from wrgl import Repository
 
 
-CITIZEN_COLS = [
-    'citizen_uid', 'allegation_uid', 'uof_uid', 'citizen_influencing_factors',
-    'citizen_arrested', 'citizen_hospitalized', 'citizen_injured', 'citizen_age',
-    'citizen_race', 'citizen_sex', 'agency'
-]
-
-
 # def __retrieve_citizen_frm_wrgl_data(branch=None):
 #     repo = Repository("https://wrgl.llead.co/", None)
 
@@ -28,14 +21,10 @@ CITIZEN_COLS = [
 #     df.to_csv('citizens.csv', index=False)
 
 
-def __build_citizen_rel(db_con):
+def __build_citizen_rel(db_con, citizens_df, citizens_cols):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
 
     print('Building relationship between agency and citizens')
-    citizens_df = pd.read_csv(
-        os.path.join(os.environ.get('DATA_DIR'), 'citizens.csv')
-    )
-
     agency_df = pd.read_sql(
         'SELECT id, agency_slug FROM departments_department',
         con=db_con
@@ -78,31 +67,30 @@ def __build_citizen_rel(db_con):
         'SELECT id, uof_uid FROM use_of_forces_useofforce',
         con=db_con
     )
-    uof_df.columns = ['uof_id', 'uof_uid']
+    uof_df.columns = ['use_of_force_id', 'uof_uid']
 
     result = pd.merge(result, uof_df, how='left', on='uof_uid')
 
-    result = result.loc[:, CITIZEN_COLS + ['department_id', 'complaint_id', 'uof_id']]
+    result = result.loc[:, citizens_cols + ['department_id', 'complaint_id', 'use_of_force_id']]
     result = result.astype({
         'department_id': int,
         'complaint_id': pd.Int64Dtype(),
-        'uof_id': pd.Int64Dtype(),
+        'use_of_force_id': pd.Int64Dtype(),
         'citizen_age': pd.Int64Dtype()
     })
     result.to_csv('citizens.csv', index=False)
 
 
-def import_citizen(db_con):
-    __build_citizen_rel(db_con)
+def run(db_con, citizens_df, citizens_cols):
+    __build_citizen_rel(db_con, citizens_df, citizens_cols)
 
     cursor = db_con.cursor()
     cursor.copy_expert(
-        sql="""
+        sql=f"""
             COPY citizens_citizen(
-                citizen_uid, allegation_uid, uof_uid, citizen_influencing_factors,
-                citizen_arrested, citizen_hospitalized, citizen_injured, citizen_age,
-                citizen_race, citizen_sex, agency, department_id, complaint_id, use_of_force_id
-            ) FROM stdin WITH CSV HEADER
+                {', '.join(citizens_cols + ['department_id', 'complaint_id', 'use_of_force_id'])}
+            )
+            FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
         file=open('citizens.csv', 'r'),

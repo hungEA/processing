@@ -4,12 +4,6 @@ from slack_sdk import WebClient
 # from wrgl import Repository
 
 
-COMPLAINT_COLS = [
-    'uid', 'tracking_id', 'allegation_uid', 'allegation',
-    'disposition', 'action', 'agency', 'allegation_desc'
-]
-
-
 # def __retrieve_complaint_frm_wrgl_data():
 #     repo = Repository("https://wrgl.llead.co/", None)
 
@@ -136,20 +130,15 @@ def __build_complaints_relationship(db_con):
     cdr_df.to_csv('complaints_departments_rel.csv', index=False)
 
 
-def import_complaint(db_con):
-    allegation_df = pd.read_csv(
-        os.path.join(os.environ.get('DATA_DIR'), 'allegation.csv')
-    )
-    allegation_df = allegation_df.loc[:, COMPLAINT_COLS]
+def run(db_con, allegation_df, allegation_cols):
+    allegation_df = allegation_df.loc[:, allegation_cols]
     allegation_df.to_csv('complaints.csv', index=False)
 
     cursor = db_con.cursor()
     cursor.copy_expert(
-        sql="""
-            COPY complaints_complaint(
-                uid, tracking_id, allegation_uid, allegation,
-                disposition, action, agency, allegation_desc
-            ) FROM stdin WITH CSV HEADER
+        sql=f"""
+            COPY complaints_complaint({', '.join(allegation_cols)})
+            FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
         file=open('complaints.csv','r'),

@@ -4,12 +4,6 @@ from slack_sdk import WebClient
 # from wrgl import Repository
 
 
-UOF_COLS = [
-    'uid', 'uof_uid', 'tracking_id', 'service_type', 'disposition',
-    'use_of_force_description', 'officer_injured', 'agency', 'use_of_force_reason'
-]
-
-
 # def __retrieve_uof_frm_wrgl_data(branch=None):
 #     repo = Repository("https://wrgl.llead.co/", None)
 
@@ -27,14 +21,10 @@ UOF_COLS = [
 #     df.to_csv('uof.csv', index=False)
 
 
-def __build_uof_rel(db_con):
+def __build_uof_rel(db_con, uof_df, uof_cols):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
 
     print('Check integrity between officers\' agency and uof agency')
-    uof_df = pd.read_csv(
-        os.path.join(os.environ.get('DATA_DIR'), 'use_of_force.csv')
-    )
-
     officers_df = pd.read_sql(
         'SELECT id, uid, agency FROM officers_officer',
         con=db_con
@@ -90,21 +80,20 @@ def __build_uof_rel(db_con):
 
         raise Exception('Cannot map agency to uof')
 
-    result = result.loc[:, UOF_COLS + ['officer_id', 'department_id']]
+    result = result.loc[:, uof_cols + ['officer_id', 'department_id']]
     result.to_csv('uof.csv', index=False)
 
 
-def import_uof(db_con):
-    __build_uof_rel(db_con)
+def run(db_con, uof_df, uof_cols):
+    __build_uof_rel(db_con, uof_df, uof_cols)
 
     cursor = db_con.cursor()
     cursor.copy_expert(
-        sql="""
+        sql=f"""
             COPY use_of_forces_useofforce(
-                uid, uof_uid, tracking_id, service_type, disposition,
-                use_of_force_description, officer_injured, agency, use_of_force_reason,
-                officer_id, department_id
-            ) FROM stdin WITH CSV HEADER
+                {', '.join(uof_cols + ['officer_id', 'department_id'])}
+            )
+            FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
         file=open('uof.csv', 'r'),

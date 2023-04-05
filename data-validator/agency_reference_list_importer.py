@@ -1,9 +1,5 @@
-import os
 import pandas as pd
 # from wrgl import Repository
-
-
-AGENCY_COLS = ['agency_slug', 'agency_name', 'location']
 
 
 # def __retrieve_wrgl_data(branch=None):
@@ -23,17 +19,14 @@ AGENCY_COLS = ['agency_slug', 'agency_name', 'location']
 #     df.to_csv('agency.csv', index=False)
 
 
-def import_department(db_con):
-    agency_df = pd.read_csv(
-        os.path.join(os.environ.get('DATA_DIR'), 'agency_reference_list.csv')
-    )
-    agency_df = agency_df.loc[:, AGENCY_COLS]
+def run(db_con, agency_df, agency_cols):
+    agency_df = agency_df.loc[:, agency_cols]
     agency_df.to_csv('agency.csv', index=False)
 
     cursor = db_con.cursor()
     cursor.copy_expert(
-        sql="""
-            COPY departments_department(agency_slug, agency_name, location)
+        sql=f"""
+            COPY departments_department({', '.join(agency_cols)})
             FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,

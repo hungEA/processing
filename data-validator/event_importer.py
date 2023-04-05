@@ -1,16 +1,7 @@
 import os
-import numpy as np
 import pandas as pd
 from slack_sdk import WebClient
 # from wrgl import Repository
-
-
-EVENT_COLS = [
-    'event_uid', 'kind', 'year', 'month', 'day', 'time', 'raw_date', 'uid',
-    'allegation_uid', 'appeal_uid', 'uof_uid', 'agency', 'badge_no',
-    'department_code', 'department_desc', 'division_desc', 'rank_code',
-    'rank_desc', 'salary', 'overtime_annual_total', 'salary_freq', 'left_reason'
-]
 
 
 # def __retrieve_event_frm_wrgl_data():
@@ -31,9 +22,8 @@ EVENT_COLS = [
 #     df.to_csv('events.csv', index=False)
 
 
-def __build_event_rel(db_con):
+def __build_event_rel(db_con, event_df, event_cols):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
-    events_df = pd.read_csv('events.csv')
 
     print('Building relationship between officers and events')
     officers_df = pd.read_sql(
@@ -42,7 +32,7 @@ def __build_event_rel(db_con):
     )
     officers_df.columns = ['officer_id', 'uid', 'officer_agency']
 
-    no_officers_in_events = events_df['uid'].dropna().unique()
+    no_officers_in_events = event_df['uid'].dropna().unique()
     print('Number of officers in WRGL event', len(no_officers_in_events))
     diff_officers = set(no_officers_in_events) - set(officers_df['uid'])
     print('Number of differences in officers', len(diff_officers))
@@ -66,7 +56,7 @@ def __build_event_rel(db_con):
     )
     agency_df.columns = ['department_id', 'agency']
 
-    no_agency_in_events = events_df['agency'].dropna().unique()
+    no_agency_in_events = event_df['agency'].dropna().unique()
     print('Number of agency in WRGL events', len(no_agency_in_events))
     diff_agency = set(no_agency_in_events) - set(agency_df['agency'])
     print('Number of differences in agency', len(diff_agency))
@@ -91,7 +81,7 @@ def __build_event_rel(db_con):
     )
     appeal_df.columns = ['appeal_id', 'appeal_uid']
 
-    no_appeal_in_events = events_df['appeal_uid'].dropna().unique()
+    no_appeal_in_events = event_df['appeal_uid'].dropna().unique()
     print('Number of appeal in WRGL events', len(no_appeal_in_events))
     diff_appeal = set(no_appeal_in_events) - set(appeal_df['appeal_uid'])
     print('Number of differences in appeal', len(diff_appeal))
@@ -114,9 +104,9 @@ def __build_event_rel(db_con):
         'SELECT id, uof_uid FROM use_of_forces_useofforce',
         con=db_con
     )
-    uof_df.columns = ['uof_id', 'uof_uid']
+    uof_df.columns = ['use_of_force_id', 'uof_uid']
 
-    no_uof_in_events = events_df['uof_uid'].dropna().unique()
+    no_uof_in_events = event_df['uof_uid'].dropna().unique()
     print('Number of uof in WRGL events', len(no_uof_in_events))
     diff_uof = set(no_uof_in_events) - set(uof_df['uof_uid'])
     print('Number of differences in uof', len(diff_uof))
@@ -135,7 +125,7 @@ def __build_event_rel(db_con):
         raise Exception('There is anomaly in the number of use-of-force in event')
 
     print('Check for integrity of officer agency and agency')
-    check_agency_df = events_df.loc[:, ['event_uid', 'uid', 'agency']]
+    check_agency_df = event_df.loc[:, ['event_uid', 'uid', 'agency']]
     check_agency_df.dropna(subset=['uid', 'agency'], inplace=True)
     check_agency_df = pd.merge(check_agency_df, officers_df, how='left', on='uid')
 
@@ -157,12 +147,14 @@ def __build_event_rel(db_con):
 
         raise Exception('There are discrepancy between agency of officers and events')
 
-    result = pd.merge(events_df, officers_df, how='left', on='uid')
+    result = pd.merge(event_df, officers_df, how='left', on='uid')
     result = pd.merge(result, agency_df, how='left', on='agency')
     result = pd.merge(result, appeal_df, how='left', on='appeal_uid')
     result = pd.merge(result, uof_df, how='left', on='uof_uid')
 
-    result = result.loc[:, EVENT_COLS + ['officer_id', 'department_id', 'appeal_id', 'uof_id']]
+    result = result.loc[:,
+        event_cols + ['officer_id', 'department_id', 'appeal_id', 'use_of_force_id']
+    ]
 
     result = result.astype({
         'year': pd.Int64Dtype(),
@@ -171,30 +163,19 @@ def __build_event_rel(db_con):
         'officer_id': pd.Int64Dtype(),
         'department_id': pd.Int64Dtype(),
         'appeal_id': pd.Int64Dtype(),
-        'uof_id': pd.Int64Dtype()
+        'use_of_force_id': pd.Int64Dtype()
     })
     result.to_csv('events.csv', index=False)
 
 
-def import_event(db_con):
-    # __retrieve_event_frm_wrgl_data()
-    event_df = pd.read_csv(
-        os.path.join(os.environ.get('DATA_DIR'), 'event.csv')
-    )
-    event_df = event_df.loc[:, EVENT_COLS]
-    event_df.to_csv('events.csv', index=False)
-
-    __build_event_rel(db_con)
+def run(db_con, event_df, event_cols):
+    __build_event_rel(db_con, event_df, event_cols)
 
     cursor = db_con.cursor()
     cursor.copy_expert(
-        sql="""
+        sql=f"""
             COPY officers_event(
-                event_uid, kind, year, month, day, time, raw_date, uid,
-                allegation_uid, appeal_uid, uof_uid, agency, badge_no,
-                department_code, department_desc, division_desc, rank_code,
-                rank_desc, salary, overtime_annual_total, salary_freq,
-                left_reason, officer_id, department_id, appeal_id, use_of_force_id
+                {', '.join(event_cols + ['officer_id', 'department_id', 'appeal_id', 'use_of_force_id'])}
             ) FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,

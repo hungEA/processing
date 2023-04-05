@@ -1,16 +1,50 @@
 import os
 import psycopg2
 import pandas as pd
+import importlib
 
-from department_importer import import_department, AGENCY_COLS
-from officer_importer import import_officer, OFFICER_COLS
-from complaint_importer import import_complaint, COMPLAINT_COLS
-from appeal_importer import import_appeal, APPEAL_COLS
-from uof_importer import import_uof, UOF_COLS
-from citizen_importer import import_citizen, CITIZEN_COLS
-from document_importer import import_document
-from event_importer import import_event, EVENT_COLS
-from person_importer import import_person, PERSON_COLS
+
+BE_SCHEMA = {
+   'agency_reference_list': [
+      'agency_slug', 'agency_name', 'location'
+   ],
+   'personnel': [
+      'uid', 'last_name', 'middle_name', 'first_name', 'birth_year',
+      'birth_month', 'birth_day', 'race', 'sex', 'agency'
+   ],
+   'allegation': [
+      'uid', 'tracking_id', 'allegation_uid', 'allegation',
+      'disposition', 'action', 'agency', 'allegation_desc'
+   ],
+   'appeals': [
+      'appeal_uid', 'uid', 'charging_supervisor', 'appeal_disposition',
+      'action_appealed', 'agency', 'motions'
+   ],
+   'use_of_force': [
+      'uid', 'uof_uid', 'tracking_id', 'service_type', 'disposition',
+      'use_of_force_description', 'officer_injured', 'agency', 'use_of_force_reason'
+   ],
+   'citizens': [
+      'citizen_uid', 'allegation_uid', 'uof_uid', 'citizen_influencing_factors',
+      'citizen_arrested', 'citizen_hospitalized', 'citizen_injured', 'citizen_age',
+      'citizen_race', 'citizen_sex', 'agency'
+   ],
+   'event': [
+      'event_uid', 'kind', 'year', 'month', 'day', 'time', 'raw_date', 'uid',
+      'allegation_uid', 'appeal_uid', 'uof_uid', 'agency', 'badge_no',
+      'department_code', 'department_desc', 'division_desc', 'rank_code',
+      'rank_desc', 'salary', 'overtime_annual_total', 'salary_freq', 'left_reason'
+   ],
+   'person': [
+      'person_id', 'canonical_uid', 'uids'
+   ],
+   'documents': [
+      'docid', 'pdf_db_path', 'pdf_db_id', 'pdf_db_content_hash',
+      'txt_db_path', 'txt_db_id', 'txt_db_content_hash', 'hrg_type',
+      'year', 'month', 'day', 'dt_source', 'hrg_no', 'accused', 'matched_uid',
+      'hrg_text', 'title', 'agency'
+   ]
+}
 
 
 def run_validator():
@@ -31,88 +65,20 @@ def run_validator():
    conn.commit()
    cursor.close()
 
-   print('======== Importing department ========')
-   agency_df = pd.read_csv(
-      os.path.join(os.environ.get('DATA_DIR'), 'agency_reference_list.csv')
-   )
-   columns = agency_df.columns
-   if not set(AGENCY_COLS).issubset(set(columns)):
-      raise Exception('BE agency columns are not recognized in the current commit')
+   for data, be_cols in BE_SCHEMA.items():
+      print(f'======== Importing {data} ========')
+      df = pd.DataFrame()
+      # documents is a special case as it retrieves data from WRGL
+      # so we will just pass a dummy DataFrame
+      if data != 'documents':
+         df = pd.read_csv(os.path.join(os.environ.get('DATA_DIR'), data + '.csv'))
 
-   import_department(conn)
+         columns = df.columns
+         if not set(be_cols).issubset(set(columns)):
+            raise Exception(f'BE {data} columns are not recognized in the current processed file')
 
-   print('======== Importing officer ========')
-   personnel_df = pd.read_csv(
-      os.path.join(os.environ.get('DATA_DIR'), 'personnel.csv')
-   )
-   columns = personnel_df.columns
-   if not set(OFFICER_COLS).issubset(set(columns)):
-      raise Exception('BE officers columns are not recognized in the current commit')
-
-   import_officer(conn)
-
-   print('======== Importing complaint ========')
-   allegation_df = pd.read_csv(
-      os.path.join(os.environ.get('DATA_DIR'), 'allegation.csv')
-   )
-   columns = allegation_df.columns
-   if not set(COMPLAINT_COLS).issubset(set(columns)):
-      raise Exception('BE complaints columns are not recognized in the current commit')
-
-   import_complaint(conn)
-
-   print('======== Importing appeal ========')
-   appeals_df = pd.read_csv(
-      os.path.join(os.environ.get('DATA_DIR'), 'appeals.csv')
-   )
-   columns = appeals_df.columns
-   if not set(APPEAL_COLS).issubset(set(columns)):
-      raise Exception('BE appeals columns are not recognized in the current commit')
-
-   import_appeal(conn)
-
-   print('======== Importing use of force ========')
-   uof_df = pd.read_csv(
-      os.path.join(os.environ.get('DATA_DIR'), 'use_of_force.csv')
-   )
-   columns = uof_df.columns
-   if not set(UOF_COLS).issubset(set(columns)):
-      raise Exception('BE use-of-force columns are not recognized in the current commit')
-
-   import_uof(conn)
-
-   print('======== Importing citizen ========')
-   citizens_df = pd.read_csv(
-      os.path.join(os.environ.get('DATA_DIR'), 'citizens.csv')
-   )
-   columns = citizens_df.columns
-   if not set(CITIZEN_COLS).issubset(set(columns)):
-      raise Exception('BE citizens columns are not recognized in the current commit')
-
-   import_citizen(conn)
-
-   print('======== Importing event ========')
-   event_df = pd.read_csv(
-      os.path.join(os.environ.get('DATA_DIR'), 'event.csv')
-   )
-   columns = event_df.columns
-   if not set(EVENT_COLS).issubset(set(columns)):
-      raise Exception('BE event columns are not recognized in the current commit')
-
-   import_event(conn)
-
-   print('======== Importing person ========')
-   person_df = pd.read_csv(
-      os.path.join(os.environ.get('DATA_DIR'), 'person.csv')
-   )
-   columns = person_df.columns
-   if not set(PERSON_COLS).issubset(set(columns)):
-      raise Exception('BE person columns are not recognized in the current commit')
-
-   import_person(conn)
-
-   print('======== Importing document ========')
-   import_document(conn)
+      module = importlib.import_module(f'{data}_importer')
+      module.run(conn, df, be_cols)
 
    conn.close()
 

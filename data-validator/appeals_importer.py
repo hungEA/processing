@@ -4,12 +4,6 @@ from slack_sdk import WebClient
 # from wrgl import Repository
 
 
-APPEAL_COLS = [
-    'appeal_uid', 'uid', 'charging_supervisor', 'appeal_disposition',
-    'action_appealed', 'agency', 'motions'
-]
-
-
 # def __retrieve_appeal_frm_wrgl_data(branch=None):
 #     repo = Repository("https://wrgl.llead.co/", None)
 
@@ -27,14 +21,10 @@ APPEAL_COLS = [
 #     df.to_csv('appeals.csv', index=False)
 
 
-def __build_appeal_rel(db_con):
+def __build_appeal_rel(db_con, appeals_df, appeals_cols):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
 
     print('Check integrity between officers\' agency and appeal agency')
-    appeals_df = pd.read_csv(
-        os.path.join(os.environ.get('DATA_DIR'), 'appeals.csv')
-    )
-
     officers_df = pd.read_sql(
         'SELECT id, uid, agency FROM officers_officer',
         con=db_con
@@ -90,20 +80,20 @@ def __build_appeal_rel(db_con):
 
         raise Exception('Cannot map agency to appeal')
 
-    result = result.loc[:, APPEAL_COLS + ['officer_id', 'department_id']]
+    result = result.loc[:, appeals_cols + ['officer_id', 'department_id']]
     result.to_csv('appeals.csv', index=False)
 
 
-def import_appeal(db_con):
-    __build_appeal_rel(db_con)
+def run(db_con, appeals_df, appeals_cols):
+    __build_appeal_rel(db_con, appeals_df, appeals_cols)
 
     cursor = db_con.cursor()
     cursor.copy_expert(
-        sql="""
+        sql=f"""
             COPY appeals_appeal(
-                appeal_uid, uid, charging_supervisor, appeal_disposition,
-                action_appealed, agency, motions, officer_id, department_id
-            ) FROM stdin WITH CSV HEADER
+                {', '.join(appeals_cols + ['officer_id', 'department_id'])}
+            )
+            FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
         file=open('appeals.csv', 'r'),

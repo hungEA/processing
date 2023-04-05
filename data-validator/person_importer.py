@@ -4,9 +4,6 @@ from slack_sdk import WebClient
 # from wrgl import Repository
 
 
-PERSON_COLS = ['person_id', 'canonical_uid', 'uids']
-
-
 # def __retrieve_person_frm_wrgl_data(branch=None):
 #     repo = Repository("https://wrgl.llead.co/", None)
 
@@ -24,21 +21,17 @@ PERSON_COLS = ['person_id', 'canonical_uid', 'uids']
 #     df.to_csv('person.csv', index=False)
 
 
-def __build_person_rel(db_con):
+def __build_person_rel(db_con, person_df, person_cols):
     client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
-
-    person_df = pd.read_csv(
-        os.path.join(os.environ.get('DATA_DIR'), 'person.csv')
-    )
 
     print('Build canonical_officer rel')
     officer_df = pd.read_sql('SELECT id, uid FROM officers_officer', con=db_con)
-    officer_df.columns = ['officer_canonical_id', 'canonical_uid']
+    officer_df.columns = ['canonical_officer_id', 'canonical_uid']
 
     result = pd.merge(person_df, officer_df, how='left', on='canonical_uid')
 
     print('Check officer canonical id after merged')
-    null_canonical_data = result[result['officer_canonical_id'].isnull()]
+    null_canonical_data = result[result['canonical_officer_id'].isnull()]
     if len(null_canonical_data) > 0:
         null_canonical_data.drop_duplicates(subset=['canonical_uid'], inplace=True)
         null_canonical_data.to_csv(
@@ -57,7 +50,7 @@ def __build_person_rel(db_con):
 
         raise Exception('Cannot map canonical uid in person to personnel')
 
-    result = result.loc[:, PERSON_COLS + ['officer_canonical_id']]
+    result = result.loc[:, person_cols + ['canonical_officer_id']]
     result.to_csv('person.csv', index=False)
 
 
@@ -139,16 +132,14 @@ def __update_person_id_in_officer(db_con):
         raise Exception('There are officers that have no person_id')
 
 
-def import_person(db_con):
-    # __retrieve_person_frm_wrgl_data()
-    __build_person_rel(db_con)
+def run(db_con, person_df, person_cols):
+    __build_person_rel(db_con, person_df, person_cols)
 
     cursor = db_con.cursor()
     cursor.copy_expert(
-        sql="""
-            COPY people_person(
-                person_id, canonical_uid, uids, canonical_officer_id
-            ) FROM stdin WITH CSV HEADER
+        sql=f"""
+            COPY people_person({', '.join(person_cols + ['canonical_officer_id'])})
+            FROM stdin WITH CSV HEADER
             DELIMITER as ','
         """,
         file=open('person.csv', 'r'),
